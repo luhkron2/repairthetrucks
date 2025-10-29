@@ -1,0 +1,4 @@
+.vercel
+se-repairs/
+node_modules/
+package-lock.json
