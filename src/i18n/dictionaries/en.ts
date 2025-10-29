@@ -1,0 +1,137 @@
+export const en = {
+  nav: {
+    home: 'Home',
+    report: 'Report',
+    workshop: 'Workshop',
+    operations: 'Operations',
+    troubleshoot: 'Troubleshoot',
+    reportCta: 'Report an issue',
+    hotlineBadge: 'Workshop coverage: 24/7 on-call response',
+    hotlinePhone: '1300 555 732',
+  },
+  language: {
+    english: 'English',
+    punjabi: 'Punjabi',
+  },
+  home: {
+    badge: 'Workshop control',
+    headline: 'Keep every vehicle rolling.',
+    subheadline:
+      'Log downtime instantly, assign the right workshop, and monitor handover readiness without leaving the screen.',
+    ctaPrimary: 'Log downtime',
+    ctaSecondary: 'Open live ops',
+    signalsTitle: 'Live workshop control',
+    signalsSubtitle: "Today's signals",
+    signalsDescription: 'Ticket load, urgent repairs, and ready assets at a glance.',
+    activeQueue: 'Active queue',
+    noActiveRepairs: 'No active repairs right now.',
+    pipelineHeading: 'Fleet pipeline snapshot',
+    pipelineSubheading: 'Quick pulse of every stage.',
+    exploreOperations: 'Explore operations dashboard',
+    latestUpdatesHeading: 'Latest workshop updates',
+    latestUpdatesSubheading: 'Fresh notes from the floor.',
+    viewDetailedRunSheet: 'View detailed run sheet',
+    table: {
+      ticket: 'Ticket',
+      fleet: 'Fleet',
+      status: 'Status',
+      severity: 'Severity',
+      latestUpdate: 'Latest update',
+      updated: 'Updated',
+      empty: 'No active repairs at the moment.',
+    },
+  },
+  report: {
+    title: 'Issue Report',
+    step1: 'Step 1 of 4',
+    step2: 'Step 2 of 4',
+    step3: 'Step 3 of 4',
+    step4: 'Step 4 of 4',
+    driverInfo: 'Driver information',
+    vehicleId: 'Vehicle identification',
+    issueSummary: 'Issue summary',
+    serviceWindow: 'Preferred service window',
+    reviewSubmit: 'Review & submit',
+    submitReport: 'Submit report',
+    driverName: 'Driver Name *',
+    driverPhone: 'Driver Phone',
+    fleetNumber: 'Fleet Number *',
+    truckRegistration: 'Truck Registration *',
+    trailerA: 'Trailer A',
+    trailerB: 'Trailer B',
+    category: 'Category *',
+    severity: 'Severity *',
+    description: 'Description *',
+    location: 'Location (optional)',
+    safeToContinue: 'Safe to continue?',
+    preferredFrom: 'From',
+    preferredTo: 'To',
+    noTrailer: 'No trailer',
+    selectTruckRego: 'Select truck registration',
+    selectTrailerA: 'Select trailer A',
+    selectTrailerB: 'Select trailer B',
+    selectCategory: 'Select category',
+    selectSeverity: 'Select severity',
+    yes: 'Yes',
+    no: 'No',
+    offlineQueue: 'Offline queue',
+    queueLabel: 'Reports waiting to sync',
+  },
+  troubleshoot: {
+    title: 'Driver Troubleshooting',
+    heading: 'Quick fixes before you log a ticket',
+    intro:
+      'Run through these checks to capture the right detail and keep the fleet moving. Escalate to operations if the vehicle remains unsafe after trying these steps.',
+    immediateChecks: 'Immediate checks',
+    stepGuidance: 'Step-by-step guidance',
+    trailerHeading: 'Trailer-specific checks',
+    trailerIntro:
+      'When trailers are coupled, capture details for both units so the workshop can stage parts and allocate the right bay.',
+    captureHeading: 'Information to capture',
+    captureIntro: 'Before you submit',
+    backToReport: 'Back to report form',
+    returnToReport: 'Return to report form',
+    stillStuck: 'Still stuck?',
+    callToAction:
+      'Contact the operations desk on {phone}. Let them know which checks you have completed and whether the truck is safe to remain on the road.',
+  },
+  footer: {
+    description:
+      'The single source of truth for workshop schedules, compliance trails, and executive-ready repair reporting.',
+    columns: [
+      {
+        title: 'Platform',
+        links: [
+          { label: 'Home', href: '/' },
+          { label: 'Features', href: '/features' },
+          { label: 'Operations', href: '/operations' },
+        ],
+      },
+      {
+        title: 'Workflows',
+        links: [
+          { label: 'Report downtime', href: '/report' },
+          { label: 'Workshop intake', href: '/workshop' },
+          { label: 'Access control', href: '/access' },
+        ],
+      },
+      {
+        title: 'Company',
+        links: [
+          { label: 'About SE Repairs', href: '/features' },
+          { label: 'Security', href: '/features#security' },
+          { label: 'Support', href: '/report#support' },
+        ],
+      },
+    ],
+    legal: {
+      security: 'Security & compliance',
+      support: 'Support',
+      incident: 'Incident response',
+    },
+  },
+} as const;
+
+export type EnglishDictionary = typeof en;
+
+
