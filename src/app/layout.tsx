@@ -79,7 +79,7 @@ export default async function RootLayout({
           <GlobalErrorHandler />
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
+            defaultTheme="dark"
             enableSystem
             disableTransitionOnChange
           >
