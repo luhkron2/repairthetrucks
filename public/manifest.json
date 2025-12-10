@@ -1,7 +1,7 @@
 {
   "name": "SE Repairs - Fleet Management Solutions",
   "short_name": "SE Repairs",
-  "description": "Professional fleet management and repair tracking system",
+  "description": "Professional fleet management and repair tracking system for drivers and workshop staff",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -9,7 +9,10 @@
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en",
+  "dir": "ltr",
   "categories": ["business", "productivity", "utilities"],
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/favicon.svg",

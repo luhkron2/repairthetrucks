@@ -10,10 +10,13 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { SeverityBadge } from '@/components/ui/severity-badge';
 import { formatMelbourneShort } from '@/lib/time';
 import { cn } from '@/lib/utils';
-import { Download, Search, LogOut, Activity, AlertTriangle, ClipboardList, CalendarCheck } from 'lucide-react';
+import { Download, Search, LogOut, Activity, AlertTriangle, ClipboardList, CalendarCheck, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { NotificationBell } from '@/components/notification-bell';
+import { QuickActionsMenu } from '@/components/quick-actions-menu';
 import { toast } from 'sonner';
 import { Issue } from '@prisma/client';
 import { TruckBooking } from '@/components/truck-booking';
@@ -145,41 +148,52 @@ export default function OperationsPage() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-      <header className="border-b border-slate-200/70 bg-white/85 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/80">
-        <div className="container mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      {/* Enhanced Header */}
+      <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl shadow-sm dark:border-slate-800/80 dark:bg-slate-950/90">
+        <div className="container mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-6">
-            <Link href="/operations" className="flex items-center gap-3 text-lg font-semibold text-slate-900 dark:text-white">
-              <Logo size="sm" />
+            <Link href="/operations" className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg">
+                <Settings className="h-6 w-6 text-white" />
+              </div>
               <div className="leading-tight">
-                <span className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">
+                <span className="block text-xs font-semibold uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">
                   Operations
                 </span>
-                <span className="block text-sm font-semibold text-slate-900 dark:text-white">
-                  Control room
+                <span className="block text-lg font-bold text-slate-900 dark:text-white">
+                  Control Room
                 </span>
               </div>
             </Link>
             <nav className="hidden md:flex items-center gap-1">
-              {[{ href: '/workshop', label: 'Workshop' }, { href: '/operations', label: 'Operations' }, { href: '/admin/mappings', label: 'Admin' }].map((item) => (
+              {[
+                { href: '/operations', label: 'Dashboard', current: true },
+                { href: '/workshop', label: 'Workshop', current: false },
+                { href: '/admin/mappings', label: 'Admin', current: false }
+              ].map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-blue-50 hover:text-blue-700 dark:text-slate-300 dark:hover:bg-slate-900/70 dark:hover:text-blue-200"
+                  className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
+                    item.current
+                      ? 'bg-purple-50 text-purple-700 shadow-sm dark:bg-purple-900/30 dark:text-purple-300'
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-900/70 dark:hover:text-white'
+                  }`}
                 >
                   {item.label}
                 </Link>
               ))}
             </nav>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge
-              variant="outline"
-              className="hidden md:inline-flex border-blue-200/60 text-slate-600 dark:border-blue-900/40 dark:text-slate-300"
-            >
-              {issues.length} tickets
-            </Badge>
-            <Button variant="ghost" size="sm" onClick={logout} className="gap-2">
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <NotificationBell />
+            <div className="hidden md:flex items-center gap-2 rounded-full border-2 border-purple-200/60 bg-purple-50/80 px-4 py-2 dark:border-purple-900/40 dark:bg-purple-900/20">
+              <Activity className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              <span className="text-sm font-semibold text-purple-700 dark:text-purple-300">{issues.length} tickets</span>
+            </div>
+            <Button variant="outline" size="sm" onClick={logout} className="gap-2 font-semibold">
               <LogOut className="h-4 w-4" />
               Logout
             </Button>
@@ -187,46 +201,55 @@ export default function OperationsPage() {
         </div>
       </header>
 
-      <main className="container mx-auto max-w-6xl px-4 py-12 space-y-10">
+      <main className="container mx-auto max-w-7xl px-4 py-10 space-y-8">
+        {/* Hero Section */}
         <section className="space-y-6">
-          <Badge
-            variant="secondary"
-            className="w-fit gap-2 rounded-full border-blue-200/70 bg-blue-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-blue-700 dark:border-blue-900/40 dark:bg-blue-900/20 dark:text-blue-200"
-          >
+          <div className="inline-flex items-center gap-2 rounded-full border-2 border-purple-200/70 bg-gradient-to-r from-purple-50 to-purple-100 px-5 py-2 text-sm font-semibold tracking-wide text-purple-700 shadow-sm dark:border-purple-900/40 dark:from-purple-900/20 dark:to-purple-900/30 dark:text-purple-300">
+            <Settings className="h-4 w-4" />
             Operations Control Room
-          </Badge>
+          </div>
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="space-y-3">
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
-                Fleet maintenance command center
+            <div className="space-y-4">
+              <h1 className="text-4xl font-bold tracking-tight text-slate-900 md:text-5xl dark:text-white">
+                Fleet Maintenance Command Center
               </h1>
-              <p className="max-w-2xl text-sm text-slate-600 dark:text-slate-300">
-                Monitor submissions, schedule workshop capacity, and export compliance-ready reports from one screen.
+              <p className="max-w-3xl text-lg text-slate-600 dark:text-slate-300">
+                Monitor submissions, schedule workshop capacity, and export compliance-ready reports from one unified dashboard.
               </p>
             </div>
-            <div className="flex flex-col items-start gap-1 text-xs text-slate-500 dark:text-slate-400">
-              <span>Signed in as operations</span>
-              <span>Data refreshes automatically every few minutes.</span>
+            <div className="flex flex-col items-start gap-2 rounded-2xl border-2 border-slate-200/70 bg-gradient-to-br from-slate-50 to-slate-100 px-5 py-4 text-sm shadow-sm dark:border-slate-800 dark:from-slate-900/60 dark:to-slate-900/80">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Signed in as</span>
+              <span className="text-base font-bold text-purple-600 dark:text-purple-400">Operations Manager</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">Data refreshes automatically</span>
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {/* Stats Grid */}
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {stats.map((stat) => {
               const Icon = stat.icon;
               return (
                 <Card
                   key={stat.label}
-                  className="group rounded-3xl border border-slate-200/70 bg-white/90 p-[1px] shadow-lg shadow-slate-900/5 transition hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/10 dark:border-slate-800/80 dark:bg-slate-900/80"
+                  className="group relative overflow-hidden rounded-3xl border-2 border-slate-200/70 bg-white/95 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:border-slate-800/80 dark:bg-slate-900/80"
                 >
-                  <CardContent className="space-y-4 rounded-[calc(1.5rem-4px)] bg-white/95 p-6 dark:bg-slate-950/60">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">{stat.label}</p>
-                      <span className="rounded-xl bg-blue-600/10 p-2 text-blue-600 transition group-hover:bg-blue-600/15 dark:bg-blue-900/30 dark:text-blue-200">
-                        <Icon className="h-4 w-4" />
-                      </span>
+                  <div className="absolute top-0 right-0 h-32 w-32 translate-x-8 -translate-y-8 rounded-full bg-gradient-to-br from-purple-500/10 to-transparent blur-2xl transition-opacity group-hover:opacity-100 opacity-50" />
+                  <CardContent className="relative space-y-5 p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">{stat.label}</p>
+                        <p className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">{stat.value}</p>
+                      </div>
+                      <div className={`rounded-xl p-3 shadow-sm transition-transform group-hover:scale-110 ${
+                        stat.tone.includes('blue') ? 'bg-blue-100 dark:bg-blue-900/30' :
+                        stat.tone.includes('amber') ? 'bg-amber-100 dark:bg-amber-900/30' :
+                        stat.tone.includes('emerald') ? 'bg-emerald-100 dark:bg-emerald-900/30' :
+                        'bg-slate-100 dark:bg-slate-800'
+                      }`}>
+                        <Icon className={`h-6 w-6 ${stat.tone}`} />
+                      </div>
                     </div>
-                    <p className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">{stat.value}</p>
-                    <p className={cn('text-xs font-medium', stat.tone)}>{stat.helper}</p>
+                    <p className={`text-sm font-semibold ${stat.tone}`}>{stat.helper}</p>
                   </CardContent>
                 </Card>
               );
@@ -393,6 +416,8 @@ export default function OperationsPage() {
           </CardContent>
         </Card>
       </main>
+
+      <QuickActionsMenu />
       <Footer className="mt-16" />
     </div>
   );

@@ -51,17 +51,14 @@ export function HomePageClient({ issues }: HomePageClientProps) {
         <div className="mb-16 text-center">
           <div className="mb-6">
             <p className="inline-flex items-center gap-2 rounded-full border border-blue-200/70 bg-blue-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-blue-700 dark:border-blue-900/40 dark:bg-blue-900/20 dark:text-blue-200">
-              {t.home.subtitle}
+              {t.home.badge}
             </p>
           </div>
           <h1 className="mb-4 text-4xl font-semibold tracking-tight text-slate-900 md:text-5xl dark:text-white">
-            {t.home.title}
+            {t.home.headline}
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-slate-600 dark:text-slate-300">
-            {t.home.description}
-          </p>
-          <p className="mx-auto mt-4 max-w-3xl text-sm text-slate-500 dark:text-slate-400">
-            {t.home.descriptionDetail}
+            {t.home.subheadline}
           </p>
         </div>
 
@@ -69,7 +66,7 @@ export function HomePageClient({ issues }: HomePageClientProps) {
           <Link href="/report" className="flex-1 sm:flex-none">
             <Button size="lg" className="w-full gap-2 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-500 px-8 py-6 text-base font-semibold text-white shadow-lg shadow-blue-500/25 transition hover:-translate-y-0.5 hover:shadow-xl dark:from-blue-500 dark:via-blue-500 dark:to-indigo-400">
               <Truck className="h-5 w-5" />
-              {t.home.logDowntime}
+              {t.home.ctaPrimary}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
@@ -80,7 +77,7 @@ export function HomePageClient({ issues }: HomePageClientProps) {
               className="group w-full gap-2 rounded-2xl border-2 border-slate-200/80 px-8 py-6 text-base font-semibold text-slate-700 transition hover:border-blue-200 hover:bg-white hover:text-blue-700 dark:border-slate-700 dark:text-slate-200 dark:hover:border-blue-700 dark:hover:bg-slate-900/70 dark:hover:text-blue-200"
             >
               <ClipboardCheck className="h-5 w-5 transition group-hover:text-blue-600 dark:group-hover:text-blue-300" />
-              {t.home.openLiveOps}
+              {t.home.ctaSecondary}
             </Button>
           </Link>
         </div>
@@ -90,9 +87,9 @@ export function HomePageClient({ issues }: HomePageClientProps) {
             <div className="flex items-start justify-between gap-6">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.35em] text-blue-600 dark:text-blue-300">
-                  {t.home.liveWorkshopControl}
+                  {t.home.signalsTitle}
                 </p>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{t.home.todaysSignals}</h2>
+                <h2 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{t.home.signalsSubtitle}</h2>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                   {t.home.signalsDescription}
                 </p>
@@ -123,13 +120,13 @@ export function HomePageClient({ issues }: HomePageClientProps) {
             <CardHeader className="space-y-3 pb-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xl font-semibold text-slate-900 dark:text-white">
-                  {t.home.latestWorkshopUpdates}
+                  {t.home.latestUpdatesHeading}
                 </CardTitle>
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-300">
                   <ClipboardCheck className="h-4 w-4" />
                 </span>
               </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">{t.home.freshNotesFromFloor}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t.home.latestUpdatesSubheading}</p>
             </CardHeader>
             <CardContent className="space-y-4">
               {issues.length > 0 ? (
@@ -189,7 +186,7 @@ export function HomePageClient({ issues }: HomePageClientProps) {
               ))}
               {issues.length === 0 && (
                 <div className="py-8 text-center">
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{t.home.noIssuesFound}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{t.home.table.empty}</p>
                 </div>
               )}
             </CardContent>

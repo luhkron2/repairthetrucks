@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limit';
-import { Logger } from '@/lib/logger';
+import { logger } from '@/lib/logger';
 
 const hasValidDatabaseUrl = () => {
   const url = process.env.DATABASE_URL;
@@ -38,6 +38,8 @@ export async function GET(request: NextRequest) {
     const fleet = searchParams.get('fleet');
     const dateFrom = searchParams.get('dateFrom');
     const dateTo = searchParams.get('dateTo');
+    const driverName = searchParams.get('driverName');
+    const limit = searchParams.get('limit');
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {};
@@ -50,6 +52,9 @@ export async function GET(request: NextRequest) {
     }
     if (fleet) {
       where.fleetNumber = { contains: fleet };
+    }
+    if (driverName) {
+      where.driverName = driverName;
     }
     if (dateFrom) {
       where.createdAt = { ...where.createdAt, gte: new Date(dateFrom) };
@@ -91,9 +96,10 @@ export async function GET(request: NextRequest) {
       orderBy: {
         createdAt: 'desc',
       },
+      take: limit ? parseInt(limit, 10) : undefined,
     });
 
-    return NextResponse.json(issues);
+    return NextResponse.json({ issues });
   } catch (error) {
     console.error('Error fetching issues:', error);
     return NextResponse.json(
@@ -164,7 +170,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    Logger.info(`Issue created: #${issue.ticket}`, { 
+    logger.info(`Issue created: #${issue.ticket}`, { 
       fleet: issue.fleetNumber, 
       severity: issue.severity,
       driver: issue.driverName 
@@ -172,7 +178,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ ticket: issue.ticket, id: issue.id }, { status: 201 });
   } catch (error) {
-    Logger.error('Error creating issue:', error);
+    logger.error('Error creating issue:', error instanceof Error ? error : undefined);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.issues },

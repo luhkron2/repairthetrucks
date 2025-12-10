@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { uploadFiles } from '@/lib/storage';
-import { Logger } from '@/lib/logger';
+import { logger } from '@/lib/logger';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = [
@@ -49,11 +49,11 @@ export async function POST(request: NextRequest) {
     // Upload files to configured S3-compatible storage
     const urls = await uploadFiles(files);
     
-    Logger.info(`Files uploaded to blob storage:`, { count: urls.length });
+    logger.info(`Files uploaded to blob storage:`, { count: urls.length });
 
     return NextResponse.json({ urls }, { status: 201 });
   } catch (error) {
-    Logger.error('Error uploading files:', error);
+    logger.error('Error uploading files:', error instanceof Error ? error : undefined);
     return NextResponse.json(
       { error: 'Failed to upload files' },
       { status: 500 }

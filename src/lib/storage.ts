@@ -1,4 +1,4 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { PutObjectCommand, S3Client, type ObjectCannedACL } from '@aws-sdk/client-s3';
 import type { PutObjectCommandInput } from '@aws-sdk/client-s3';
 import { put } from '@vercel/blob';
 import { randomUUID } from 'crypto';
@@ -88,7 +88,7 @@ export async function uploadFile(file: File): Promise<string> {
       ContentType: file.type || 'application/octet-stream',
     };
     if (process.env.S3_OBJECT_ACL) {
-      params.ACL = process.env.S3_OBJECT_ACL;
+      params.ACL = process.env.S3_OBJECT_ACL as ObjectCannedACL;
     }
 
     await client.send(new PutObjectCommand(params));

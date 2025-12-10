@@ -77,16 +77,18 @@ export function UploadZone({
   );
 
   const removeFile = (index: number) => {
+    const removedFile = files[index];
     const updatedFiles = files.filter((_, i) => i !== index);
     setFiles(updatedFiles);
     onFilesChange(updatedFiles);
     
-    const removedFile = files[index];
-    setPreviews((prev) => {
-      const newPreviews = { ...prev };
-      delete newPreviews[removedFile.name];
-      return newPreviews;
-    });
+    if (removedFile) {
+      setPreviews((prev) => {
+        const newPreviews = { ...prev };
+        delete newPreviews[removedFile.name];
+        return newPreviews;
+      });
+    }
   };
 
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -168,7 +170,7 @@ export function UploadZone({
               {file.type.startsWith('image/') && previews[file.name] ? (
                 <div className="relative h-32 w-full">
                   <Image
-                    src={previews[file.name]}
+                    src={previews[file.name]!}
                     alt={file.name}
                     fill
                     className="object-cover"

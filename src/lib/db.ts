@@ -21,7 +21,7 @@ export async function checkDatabaseConnection(): Promise<boolean> {
     logger.info('Database connection healthy');
     return true;
   } catch (error) {
-    logger.error('Database connection failed:', error);
+    logger.error('Database connection failed:', error instanceof Error ? error : undefined);
     return false;
   }
 }

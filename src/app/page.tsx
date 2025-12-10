@@ -1,168 +1,287 @@
-import type { Metadata } from 'next';
-import { BarChart3, Calendar, ClipboardCheck, Clock, PhoneCall, Truck, Wrench, Zap } from 'lucide-react';
-import type { ComponentType } from 'react';
+'use client';
 
-import { DashboardClient } from '@/components/dashboard-client';
-import { FloatingActionWrapper } from '@/components/floating-action-wrapper';
-import { Navigation } from '@/components/navigation';
 import Link from 'next/link';
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Wrench, Settings, Truck, CheckCircle2, ArrowRight, Shield, Eye, EyeOff } from 'lucide-react';
+import { toast } from 'sonner';
 
-const actions: Array<{
-  href: string;
-  label: string;
-  sublabel?: string;
-  icon: ComponentType<{ className?: string }>;
-}> = [
-  {
-    href: '/report',
-    label: 'Report downtime',
-    sublabel: 'Log an issue with photos',
+const ACCESS_LEVELS = {
+  driver: {
+    name: 'Driver',
+    description: 'Report vehicle issues and track repairs',
     icon: Truck,
+    password: null, // No password needed for drivers
+    redirect: '/report',
+    color: 'from-blue-500 to-blue-600',
+    highlights: [
+      'Quick photo capture for issue reporting',
+      'Track your submitted repair tickets in real-time',
+      'Offline support with automatic sync when back online'
+    ]
   },
-  {
-    href: '/issues',
-    label: 'My repair tickets',
-    sublabel: 'Track what you have lodged',
-    icon: ClipboardCheck,
+  operations: {
+    name: 'Operations',
+    description: 'Manage operations and view all reports',
+    icon: Settings,
+    password: 'ops123',
+    redirect: '/operations',
+    color: 'from-purple-500 to-purple-600',
+    highlights: [
+      'Monitor and triage new incident reports in real-time',
+      'Assign workshop actions and track fleet availability',
+      'Export compliance-ready summaries for leadership'
+    ]
   },
-  {
-    href: '/schedule',
-    label: 'Workshop schedule',
-    sublabel: 'See booked repair windows',
-    icon: Calendar,
-  },
-  {
-    href: '/report#support',
-    label: 'Contact operations',
-    sublabel: 'Call for immediate support',
-    icon: PhoneCall,
-  },
-];
-
-const quickStats = [
-  {
-    icon: Zap,
-    label: 'Avg. Response Time',
-    value: '18 min',
-    change: '+2%',
-    positive: true,
-  },
-  {
-    icon: BarChart3,
-    label: 'Efficiency Rate',
-    value: '94%',
-    change: '+5%',
-    positive: true,
-  },
-  {
+  workshop: {
+    name: 'Workshop',
+    description: 'Manage repairs and workshop operations',
     icon: Wrench,
-    label: 'Repairs Today',
-    value: '24',
-    change: '-3%',
-    positive: false,
-  },
-  {
-    icon: Clock,
-    label: 'Avg. Repair Time',
-    value: '2.3h',
-    change: '-8%',
-    positive: true,
-  },
-];
-
-export const metadata: Metadata = {
-  title: 'SE National — Repair Control',
-  description: 'Central console for intake, live operations and workshop coordination across the network.',
+    password: 'workshop123',
+    redirect: '/workshop',
+    color: 'from-orange-500 to-orange-600',
+    highlights: [
+      'See the live repair queue with priority indicators',
+      'Update job progress and attach completion notes',
+      'Coordinate with operations for parts and scheduling'
+    ]
+  }
 };
 
 export default function HomePage() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 text-slate-900 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 dark:text-slate-100">
-      <Navigation />
-      <main className="container mx-auto max-w-7xl px-4 sm:px-6 py-12 pb-24">
-        {/* Hero Section */}
-        <header className="mb-16 text-center animate-slide-in-up">
-          <div className="inline-flex items-center gap-3 rounded-full border-2 border-blue-200/80 bg-blue-100/50 px-5 py-2.5 text-sm font-bold tracking-wide text-blue-700 shadow-lg backdrop-blur-sm dark:border-blue-800/60 dark:bg-blue-900/40 dark:text-blue-300">
-            <div className="h-3 w-3 rounded-full bg-green-500 animate-pulse"></div>
-            SE National Live Operations
-          </div>
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tighter text-slate-900 mt-6 mb-6 dark:text-slate-100">
-            Fleet Repair <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500">Control Center</span>
-          </h1>
-          <p className="text-lg md:text-xl max-w-4xl mx-auto text-slate-600 dark:text-slate-300">
-            Professional fleet management system for logging downtime, tracking repair tickets, managing workshop schedules, and coordinating operations across the network.
-          </p>
-        </header>
+  const [selectedAccess, setSelectedAccess] = useState<string | null>(null);
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-        {/* Quick Stats */}
-        <section className="mb-16">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {quickStats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <div 
-                  key={index}
-                  className="bg-white/80 dark:bg-slate-800/70 backdrop-blur-md rounded-2xl border-2 border-slate-200/80 p-6 shadow-lg hover:shadow-xl transition-all duration-300 dark:border-slate-700/70 transform hover:-translate-y-1"
+  const handleAccessSelect = (accessType: string) => {
+    const accessConfig = ACCESS_LEVELS[accessType as keyof typeof ACCESS_LEVELS];
+    
+    // If driver access (no password required), redirect immediately
+    if (!accessConfig.password) {
+      toast.success(`Welcome, ${accessConfig.name}!`);
+      window.location.href = accessConfig.redirect;
+      return;
+    }
+    
+    // Otherwise, show password prompt
+    setSelectedAccess(accessType);
+    setPassword('');
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedAccess) return;
+
+    setLoading(true);
+
+    // Immediate password check
+    const accessConfig = ACCESS_LEVELS[selectedAccess as keyof typeof ACCESS_LEVELS];
+    
+    if (password === accessConfig.password) {
+      // Store access level in session storage
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('accessLevel', selectedAccess);
+        sessionStorage.setItem('isAuthenticated', 'true');
+      }
+      
+      toast.success(`Welcome to ${accessConfig.name}!`);
+      // Use window.location for immediate redirect
+      window.location.href = accessConfig.redirect;
+    } else {
+      toast.error('Invalid password. Please try again.');
+      setPassword('');
+      setLoading(false);
+    }
+  };
+
+  const handleBack = () => {
+    setSelectedAccess(null);
+    setPassword('');
+  };
+
+  if (selectedAccess) {
+    const accessConfig = ACCESS_LEVELS[selectedAccess as keyof typeof ACCESS_LEVELS];
+    const IconComponent = accessConfig.icon;
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-slate-900 to-purple-900 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md rounded-3xl border-2 border-slate-700/50 bg-gradient-to-br from-slate-800 to-slate-900 shadow-2xl backdrop-blur-sm">
+          <CardHeader className="text-center space-y-4 pb-6">
+            <div className="flex justify-center">
+              <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${accessConfig.color} flex items-center justify-center shadow-lg`}>
+                <IconComponent className="w-10 h-10 text-white" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="uppercase tracking-[0.35em] text-[0.65rem] text-blue-300 font-semibold">
+                Step 2 of 2 • Authentication
+              </p>
+              <CardTitle className="text-2xl font-bold text-white">{accessConfig.name} Access</CardTitle>
+              <CardDescription className="text-base text-blue-200">{accessConfig.description}</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="p-4 rounded-xl bg-blue-900/40 border border-blue-700/50">
+              <p className="text-sm text-blue-100">
+                For security, this area is limited to SE Repairs staff. Enter the latest passphrase to continue.
+              </p>
+            </div>
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-base font-semibold text-white">Enter Password</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="pr-10 h-12 text-base bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-400"
+                    required
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row pt-2">
+                <Button type="button" variant="outline" onClick={handleBack} className="flex-1 h-12 border-slate-600 bg-slate-800/50 text-white hover:bg-slate-700">
+                  Back
+                </Button>
+                <Button type="submit" disabled={loading} className="flex-1 h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white">
+                  {loading ? 'Verifying...' : 'Access Dashboard'}
+                </Button>
+              </div>
+            </form>
+            <div className="rounded-xl border border-amber-700/50 bg-amber-900/20 p-4 text-left">
+              <p className="font-semibold text-sm text-amber-200 mb-1">💡 Tip</p>
+              <p className="text-xs text-amber-100/90">Passwords rotate regularly. If you need the latest passphrase, contact operations leadership.</p>
+            </div>
+            <div className="text-center text-sm text-slate-300">
+              <p>
+                Need access? Email{' '}
+                <a
+                  href="mailto:support@se-repairs.com"
+                  className="font-semibold text-blue-300 underline underline-offset-4 hover:text-blue-200"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="p-3 rounded-xl bg-blue-100/70 dark:bg-blue-900/50">
-                      <Icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <span className={`text-sm font-bold px-3 py-1.5 rounded-full ${
-                      stat.positive 
-                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300' 
-                        : 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300'
-                    }`}>
-                      {stat.change}
-                    </span>
-                  </div>
-                  <div className="mt-5">
-                    <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">{stat.value}</p>
-                    <p className="text-base text-slate-600 dark:text-slate-400 mt-1.5">{stat.label}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
+                  support@se-repairs.com
+                </a>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
-        {/* Action Cards */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold mb-8 text-slate-900 dark:text-slate-100">Quick Actions</h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {actions.map((a, index) => (
-              <Link
-                key={a.href}
-                href={a.href}
-                prefetch
-                className="dashboard-card group bg-white/80 dark:bg-slate-800/70 backdrop-blur-md rounded-2xl border-2 border-slate-200/80 p-6 shadow-lg hover:shadow-xl transition-all duration-300 dark:border-slate-700/70 hover:border-blue-400 dark:hover:border-blue-600/60 transform hover:-translate-y-1.5 animate-fade-in-scale"
-                style={{ animationDelay: `${index * 120}ms` }}
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-slate-900 to-purple-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-6xl">
+        <div className="text-center mb-12 space-y-6">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-2xl">
+              <Wrench className="h-8 w-8 text-white" />
+            </div>
+            <span className="text-4xl font-bold tracking-tight text-white">
+              SE Repairs
+            </span>
+          </div>
+          <div className="space-y-3">
+            <p className="uppercase tracking-[0.35em] text-xs text-blue-300 font-semibold">
+              Step 1 of 2 • Access Selection
+            </p>
+            <h1 className="text-5xl font-bold text-white tracking-tight">
+              Welcome to SE Repairs
+            </h1>
+            <p className="text-xl text-blue-100 max-w-2xl mx-auto">
+              Fleet Management & Repair Tracking System
+            </p>
+            <p className="text-base text-slate-300 max-w-xl mx-auto">
+              Select your role to access the appropriate dashboard and tools
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          {Object.entries(ACCESS_LEVELS).map(([key, config], index) => {
+            const IconComponent = config.icon;
+            return (
+              <Card
+                key={key}
+                className="group relative h-full cursor-pointer overflow-hidden rounded-3xl border-2 border-slate-700/50 bg-gradient-to-br from-slate-800 to-slate-900 shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:border-blue-400 hover:shadow-blue-500/20 backdrop-blur-sm"
+                onClick={() => handleAccessSelect(key)}
               >
-                <div className="flex items-start gap-5">
-                  <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg transition-transform group-hover:scale-110 dark:from-blue-400 dark:to-indigo-500">
-                    <a.icon className="h-7 w-7" aria-hidden="true" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-base font-bold text-slate-900 dark:text-slate-100">{a.label}</p>
-                    {a.sublabel ? (
-                      <p className="truncate text-sm text-slate-600 dark:text-slate-400 mt-1.5">{a.sublabel}</p>
-                    ) : null}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br opacity-10 blur-2xl transition-opacity group-hover:opacity-20" 
+                     style={{ background: `linear-gradient(to bottom right, ${config.color.split(' ')[1]}, ${config.color.split(' ')[3]})` }} />
+                <CardHeader className="space-y-4 text-center relative z-10">
+                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br shadow-lg transition-transform group-hover:scale-110 group-hover:shadow-xl"
+                       style={{ background: `linear-gradient(to bottom right, ${config.color.split(' ')[1]}, ${config.color.split(' ')[3]})` }}>
+                    <IconComponent className="h-10 w-10 text-white" />
                   </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
+                  <div className="space-y-2">
+                    <CardTitle className="text-2xl font-bold text-white">
+                      {config.name}
+                    </CardTitle>
+                    <CardDescription className="text-base text-blue-200">
+                      {config.description}
+                    </CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent className="relative z-10 space-y-6 px-6 pb-6">
+                  <ul className="space-y-3 text-sm">
+                    {config.highlights.map((highlight, i) => (
+                      <li key={i} className="flex items-start gap-3 text-slate-200">
+                        <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-400" />
+                        <span>{highlight}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Button 
+                    className="w-full justify-center gap-2 text-base h-12 bg-gradient-to-r shadow-md transition-all group-hover:shadow-lg"
+                    style={{ background: `linear-gradient(to right, ${config.color.split(' ')[1]}, ${config.color.split(' ')[3]})` }}
+                  >
+                    {config.password ? (
+                      <>
+                        <Shield className="h-5 w-5" />
+                        Access {config.name}
+                      </>
+                    ) : (
+                      <>
+                        <ArrowRight className="h-5 w-5" />
+                        Enter {config.name}
+                      </>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
 
-        {/* Dashboard Section */}
-        <section className="mb-12">
-          <div className="rounded-2xl bg-white/80 dark:bg-slate-800/70 backdrop-blur-md border-2 border-slate-200/80 p-6 shadow-lg dark:border-slate-700/70">
-            <h2 className="text-3xl font-bold mb-8 text-slate-900 dark:text-slate-100">Live Dashboard</h2>
-            <DashboardClient />
-          </div>
-        </section>
-      </main>
-      <FloatingActionWrapper />
+        <Card className="rounded-3xl border-2 border-blue-800/50 bg-gradient-to-r from-blue-900/80 to-purple-900/80 backdrop-blur-sm shadow-2xl">
+          <CardContent className="p-6 text-center">
+            <p className="text-sm text-blue-100">
+              Need access or forgot your password? Email{' '}
+              <a
+                href="mailto:support@se-repairs.com"
+                className="font-semibold text-blue-300 underline underline-offset-4 hover:text-blue-200 transition-colors"
+              >
+                support@se-repairs.com
+              </a>{' '}
+              for help.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

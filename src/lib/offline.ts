@@ -103,8 +103,30 @@ export async function getQueueLength(): Promise<number> {
   return count;
 }
 
+export async function getQueuedIssues(): Promise<Array<{ id: string; data: any; timestamp: number; retries: number }>> {
+  const db = await getDB();
+  const issues = await db.getAll('issues');
+  return issues;
+}
+
+export async function removeQueuedIssue(id: string): Promise<void> {
+  const db = await getDB();
+  await db.delete('issues', id);
+}
+
 export async function clearQueue(): Promise<void> {
   const db = await getDB();
   await db.clear('issues');
+}
+
+export async function getLastSyncTime(): Promise<number | null> {
+  if (typeof window === 'undefined') return null;
+  const lastSync = localStorage.getItem('last-offline-sync');
+  return lastSync ? parseInt(lastSync, 10) : null;
+}
+
+export async function setLastSyncTime(time: number): Promise<void> {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('last-offline-sync', time.toString());
 }
 

@@ -17,11 +17,13 @@ import { UploadZone } from '@/components/upload-zone';
 import { fetchMappings, type MappingsCache } from '@/lib/mappings';
 import { queueIssue, retryQueue, getQueueLength } from '@/lib/offline';
 import { toast } from 'sonner';
-import { Loader2, MapPin, Wifi, WifiOff, RefreshCw, UploadCloud, Phone, AlertCircle, Wrench, Thermometer, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Loader2, MapPin, Wifi, WifiOff, RefreshCw, UploadCloud, Phone, AlertCircle, Wrench, Thermometer, AlertTriangle, ArrowRight, Truck } from 'lucide-react';
 import { Logo } from '@/components/ui/logo';
 import { Navigation } from '@/components/navigation';
 import { Footer } from '@/components/footer';
 import { useTranslation } from '@/components/translation-provider';
+import { QuickActionsMenu } from '@/components/quick-actions-menu';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const reportSchema = z.object({
   driverName: z.string().min(1, 'Driver name is required'),
@@ -282,6 +284,11 @@ const onSubmit = async (data: ReportForm) => {
   let mediaUrls: string[] = [];
 
   try {
+    // Save driver name for My Issues page
+    if (data.driverName) {
+      localStorage.setItem('last-driver-name', data.driverName);
+    }
+
     if (files.length > 0) {
       const formData = new FormData();
       formData.append('issueId', 'temp');
@@ -327,6 +334,10 @@ const onSubmit = async (data: ReportForm) => {
     }
 
     const { ticket } = await response.json();
+    
+    // Mark visit for PWA installer
+    localStorage.setItem('visited-report', 'true');
+    
     toast.success('Report submitted successfully!');
     router.push(`/thanks/${ticket}`);
   } catch (error) {
@@ -349,42 +360,45 @@ const onSubmit = async (data: ReportForm) => {
 };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-slate-50 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       <Navigation />
 
-      <main className="container mx-auto max-w-6xl px-4 py-16">
-        <header className="mb-12 space-y-4 text-center">
-          <Logo size="lg" className="mx-auto" />
-          <p className="mx-auto inline-flex items-center gap-2 rounded-full border border-blue-200/70 bg-blue-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-blue-700 dark:border-blue-900/40 dark:bg-blue-900/20 dark:text-blue-200">
-            {t.home.subtitle}
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl dark:text-white">
-            {t.home.description}
-          </h1>
-          <p className="mx-auto max-w-2xl text-base text-slate-600 dark:text-slate-300">
-            {t.home.descriptionDetail}
-          </p>
+      <main className="container mx-auto max-w-7xl px-4 py-8 md:py-12">
+        {/* Hero Header */}
+        <header className="mb-10 space-y-6 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border-2 border-blue-200/70 bg-gradient-to-r from-blue-50 to-blue-100 px-5 py-2 text-sm font-semibold tracking-wide text-blue-700 shadow-sm dark:border-blue-900/40 dark:from-blue-900/20 dark:to-blue-900/30 dark:text-blue-300">
+            <Truck className="h-4 w-4" />
+            Driver Report
+          </div>
+          <div className="space-y-3">
+            <h1 className="text-4xl font-bold tracking-tight text-slate-900 md:text-5xl dark:text-white">
+              Report an Issue
+            </h1>
+            <p className="mx-auto max-w-2xl text-lg text-slate-600 dark:text-slate-300">
+              Fill out the form below to report vehicle issues. Your submission will be instantly routed to the operations team.
+            </p>
+          </div>
         </header>
 
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
-          <Card className="rounded-3xl border border-blue-100/70 bg-white/95 shadow-2xl backdrop-blur dark:border-blue-900/40 dark:bg-slate-900/80">
-            <CardHeader className="space-y-6 p-8 pb-6">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <Card className="rounded-3xl border-2 border-slate-200/80 bg-white/95 shadow-xl backdrop-blur-sm dark:border-slate-800/80 dark:bg-slate-900/80">
+            <CardHeader className="space-y-6 border-b border-slate-200/70 p-8 pb-6 dark:border-slate-800">
               <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.4em] text-blue-600 dark:text-blue-300">{t.report.step1}</p>
-                  <h2 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">
-                    {translate('Capture incident details')}
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.4em] text-blue-600 dark:text-blue-400">{t.report.step1}</p>
+                  <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
+                    {translate('Issue Report Form')}
                   </h2>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    {translate('Fields marked with * are required for a successful submission.')}
+                  <p className="text-base text-slate-600 dark:text-slate-400">
+                    {translate('Fields marked with * are required for submission.')}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-3 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/60">
+                <div className="rounded-2xl border-2 border-slate-200/70 bg-gradient-to-br from-slate-50 to-slate-100 px-5 py-4 text-center shadow-sm dark:border-slate-800 dark:from-slate-900/60 dark:to-slate-900/80">
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
                     {translate('Offline queue')}
                   </p>
-                  <p className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">{queueLength}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{translate('Reports waiting to sync')}</p>
+                  <p className="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{queueLength}</p>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{translate('Reports waiting to sync')}</p>
                 </div>
               </div>
 
@@ -432,7 +446,7 @@ const onSubmit = async (data: ReportForm) => {
                           render={({ field }) => (
                             <Select
                               value={field.value || undefined}
-                              onValueChange={(value) => field.onChange(value)}
+                              onValueChange={(value: string) => field.onChange(value)}
                             >
                               <SelectTrigger id="driverName">
                                 <SelectValue placeholder={translate('Select driver')} />
@@ -475,7 +489,7 @@ const onSubmit = async (data: ReportForm) => {
                           render={({ field }) => (
                             <Select
                               value={field.value || undefined}
-                              onValueChange={(value) => {
+                              onValueChange={(value: string) => {
                                 field.onChange(value);
                                 const rego = value ? mappings?.fleets[value]?.rego ?? '' : '';
                                 setValue('primeRego', rego);
@@ -544,7 +558,7 @@ const onSubmit = async (data: ReportForm) => {
                           render={({ field }) => (
                             <Select
                               value={field.value || undefined}
-                              onValueChange={(value) => {
+                              onValueChange={(value: string) => {
                                 if (value === '__clear__') {
                                   field.onChange('');
                                 } else {
@@ -582,7 +596,7 @@ const onSubmit = async (data: ReportForm) => {
                           render={({ field }) => (
                             <Select
                               value={field.value || undefined}
-                              onValueChange={(value) => {
+                              onValueChange={(value: string) => {
                                 if (value === '__clear__') {
                                   field.onChange('');
                                 } else {
@@ -623,7 +637,7 @@ const onSubmit = async (data: ReportForm) => {
                   <div className="mt-4 grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="category">{t.report.category}</Label>
-                      <Select onValueChange={(value) => setValue('category', value)}>
+                      <Select onValueChange={(value: string) => setValue('category', value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
@@ -640,7 +654,7 @@ const onSubmit = async (data: ReportForm) => {
                     </div>
                     <div className="space-y-2">
                       <Label>{t.report.severity}</Label>
-                      <RadioGroup defaultValue="MEDIUM" onValueChange={(value) => setValue('severity', value as ReportForm['severity'])}>
+                      <RadioGroup defaultValue="MEDIUM" onValueChange={(value: string) => setValue('severity', value as ReportForm['severity'])}>
                         <div className="flex flex-wrap gap-4">
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="LOW" id="low" />
@@ -695,7 +709,7 @@ const onSubmit = async (data: ReportForm) => {
                   </div>
                   <div className="mt-4 space-y-2">
                     <Label>Safe to continue driving?</Label>
-                    <RadioGroup defaultValue="Yes" onValueChange={(value) => setValue('safeToContinue', value)} className="flex flex-wrap gap-4">
+                    <RadioGroup defaultValue="Yes" onValueChange={(value: string) => setValue('safeToContinue', value)} className="flex flex-wrap gap-4">
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="Yes" id="safe-yes" />
                         <Label htmlFor="safe-yes" className="font-normal">Yes</Label>
@@ -848,6 +862,8 @@ const onSubmit = async (data: ReportForm) => {
           </aside>
         </div>
       </main>
+
+      <QuickActionsMenu />
       <Footer className="mt-16" />
     </div>
   );

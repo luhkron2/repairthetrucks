@@ -15,6 +15,11 @@ interface PerformanceMonitorProps {
   enableLogging?: boolean;
 }
 
+interface LayoutShiftEntry extends PerformanceEntry {
+  value: number;
+  hadRecentInput: boolean;
+}
+
 export function PerformanceMonitor({ onMetrics, enableLogging = false }: PerformanceMonitorProps) {
   const metricsRef = useRef<Partial<PerformanceMetrics>>({});
 
@@ -51,7 +56,10 @@ export function PerformanceMonitor({ onMetrics, enableLogging = false }: Perform
       // First Input Delay
       new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          logMetric('fid', entry.processingStart - entry.startTime);
+          const fidEntry = entry as PerformanceEventTiming;
+          if (fidEntry.processingStart) {
+            logMetric('fid', fidEntry.processingStart - fidEntry.startTime);
+          }
         }
       }).observe({ entryTypes: ['first-input'] });
 
@@ -59,8 +67,9 @@ export function PerformanceMonitor({ onMetrics, enableLogging = false }: Perform
       new PerformanceObserver((list) => {
         let clsValue = 0;
         for (const entry of list.getEntries()) {
-          if (!entry.hadRecentInput) {
-            clsValue += entry.value;
+          const layoutEntry = entry as LayoutShiftEntry;
+          if (!layoutEntry.hadRecentInput) {
+            clsValue += layoutEntry.value;
           }
         }
         logMetric('cls', clsValue);
@@ -141,7 +150,7 @@ export function PerformanceMonitor({ onMetrics, enableLogging = false }: Perform
 
 // Hook for manual performance tracking
 export function usePerformanceTracker() {
-  const startTime = useRef<number>();
+  const startTime = useRef<number | undefined>(undefined);
 
   const startTracking = (label: string) => {
     startTime.current = performance.now();

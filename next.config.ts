@@ -4,17 +4,12 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['@prisma/client', 'bcryptjs'],
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-    turbopack: {
-      root: process.cwd(),
-    },
     optimizeCss: true,
     scrollRestoration: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
   },
-  output: 'standalone',
-  swcMinify: true,
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },

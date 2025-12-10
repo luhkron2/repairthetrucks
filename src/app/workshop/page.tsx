@@ -9,9 +9,13 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Logo } from '@/components/ui/logo';
 import { Navigation } from '@/components/navigation';
-import { LogOut, Filter } from 'lucide-react';
+import { LogOut, Filter, Wrench } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { NotificationBell } from '@/components/notification-bell';
+import { QuickActionsMenu } from '@/components/quick-actions-menu';
 import { Issue, Status } from '@prisma/client';
 import { TruckBooking } from '@/components/truck-booking';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -130,25 +134,54 @@ export default function WorkshopPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <Navigation />
-
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <Logo size="lg" />
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Workshop Dashboard</h1>
-                <p className="text-gray-600 dark:text-gray-300">Manage and track repair issues</p>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50/30 via-white to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950">
+      {/* Enhanced Header */}
+      <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl shadow-sm dark:border-slate-800/80 dark:bg-slate-950/90">
+        <div className="container mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+          <div className="flex items-center gap-6">
+            <Link href="/workshop" className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-lg">
+                <Wrench className="h-6 w-6 text-white" />
               </div>
+              <div className="leading-tight">
+                <span className="block text-xs font-semibold uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">
+                  Workshop
+                </span>
+                <span className="block text-lg font-bold text-slate-900 dark:text-white">
+                  Repair Dashboard
+                </span>
+              </div>
+            </Link>
+          </div>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <NotificationBell />
+            <div className="hidden md:flex items-center gap-2 rounded-full border-2 border-orange-200/60 bg-orange-50/80 px-4 py-2 dark:border-orange-900/40 dark:bg-orange-900/20">
+              <Wrench className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+              <span className="text-sm font-semibold text-orange-700 dark:text-orange-300">{issues.length} issues</span>
             </div>
-            <Button variant="ghost" size="sm" onClick={logout}>
-              <LogOut className="w-4 h-4 mr-2" />
+            <Button variant="outline" size="sm" onClick={logout} className="gap-2 font-semibold">
+              <LogOut className="w-4 h-4" />
               Logout
             </Button>
           </div>
-          
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="container mx-auto max-w-7xl px-4 py-10">
+        <div className="mb-8 space-y-6">
+          {/* Hero Section */}
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 rounded-full border-2 border-orange-200/70 bg-gradient-to-r from-orange-50 to-orange-100 px-5 py-2 text-sm font-semibold tracking-wide text-orange-700 shadow-sm dark:border-orange-900/40 dark:from-orange-900/20 dark:to-orange-900/30 dark:text-orange-300">
+              <Wrench className="h-4 w-4" />
+              Workshop Control Panel
+            </div>
+            <h1 className="text-4xl font-bold tracking-tight text-gray-900 md:text-5xl dark:text-white">Repair Queue Management</h1>
+            <p className="max-w-3xl text-lg text-gray-600 dark:text-gray-300">Track repairs, update job progress, and coordinate with operations for parts and scheduling.</p>
+          </div>
+
+          {/* Filters */}
           <div className="flex flex-wrap gap-4">
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-muted-foreground" />
@@ -251,7 +284,7 @@ export default function WorkshopPage() {
         </Tabs>
       </div>
 
-      <Dialog open={updateDialogOpen} onOpenChange={(open) => {
+      <Dialog open={updateDialogOpen} onOpenChange={(open: boolean) => {
         setUpdateDialogOpen(open);
         if (!open) {
           setSelectedIssue(null);
@@ -268,7 +301,7 @@ export default function WorkshopPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="update-status">Status</Label>
-              <Select value={updateStatus} onValueChange={(value) => setUpdateStatus(value as Status)}>
+              <Select value={updateStatus} onValueChange={(value: string) => setUpdateStatus(value as Status)}>
                 <SelectTrigger id="update-status">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
@@ -301,6 +334,8 @@ export default function WorkshopPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <QuickActionsMenu />
     </div>
   );
 }
