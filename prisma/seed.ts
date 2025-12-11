@@ -16,8 +16,11 @@ async function main() {
   await prisma.user.deleteMany();
   console.log('✅ Cleared existing data');
 
-  // Hash password for all users
-  const hashedPassword = await bcrypt.hash('password123', 10);
+  // Hash passwords per role
+  const adminPassword = await bcrypt.hash('admin@senational', 10);
+  const opsPassword = await bcrypt.hash('runtheshow', 10);
+  const workshopPassword = await bcrypt.hash('workshop@senational', 10);
+  const driverPassword = await bcrypt.hash('password123', 10);
 
   // Create users
   const workshopUser = await prisma.user.upsert({
@@ -27,7 +30,7 @@ async function main() {
       email: 'workshop@example.com',
       username: 'workshop',
       name: 'Workshop Team',
-      password: hashedPassword,
+      password: workshopPassword,
       role: 'WORKSHOP',
     },
   });
@@ -39,7 +42,7 @@ async function main() {
       email: 'ops@example.com',
       username: 'ops',
       name: 'Operations Team',
-      password: hashedPassword,
+      password: opsPassword,
       role: 'OPERATIONS',
     },
   });
@@ -51,7 +54,7 @@ async function main() {
       email: 'admin@example.com',
       username: 'admin',
       name: 'Admin User',
-      password: hashedPassword,
+      password: adminPassword,
       role: 'ADMIN',
     },
   });
@@ -63,7 +66,7 @@ async function main() {
       email: 'driver@example.com',
       username: 'driver',
       name: 'Test Driver',
-      password: hashedPassword,
+      password: driverPassword,
       role: 'DRIVER',
       phone: '+61 412 345 678',
     },
@@ -249,10 +252,10 @@ async function main() {
 
   console.log('🎉 Seeding complete!');
   console.log('\n📋 Test Accounts:');
-  console.log('  workshop@example.com / password123');
-  console.log('  ops@example.com / password123');
-  console.log('  admin@example.com / password123');
-  console.log('  driver@example.com / password123');
+  console.log('  workshop@example.com / workshop@senational');
+  console.log('  ops@example.com / runtheshow');
+  console.log('  admin@example.com / admin@senational');
+  console.log('  driver@example.com / (login disabled for drivers)');
 }
 
 main()

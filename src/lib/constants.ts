@@ -50,9 +50,18 @@ export const USER_ROLES = {
 } as const;
 
 export const FILE_UPLOAD = {
-  maxSize: 10 * 1024 * 1024, // 10MB
-  allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/webm'],
-  maxFiles: 5,
+  maxSizeMB: 10, // used for both client and API validation
+  allowedTypes: [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/webp',
+    'image/gif',
+    'video/mp4',
+    'video/quicktime',
+    'video/x-msvideo',
+  ],
+  maxFiles: 10,
 } as const;
 
 export const CACHE_KEYS = {

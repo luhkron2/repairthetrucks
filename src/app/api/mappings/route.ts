@@ -111,6 +111,22 @@ function invalidateCache() {
 export async function GET() {
   try {
     const mappings = await loadMappings();
+
+    const hasRecords =
+      Object.keys(mappings.drivers).length > 0 ||
+      Object.keys(mappings.fleets).length > 0 ||
+      Object.keys(mappings.trailers).length > 0;
+
+    if (!hasRecords) {
+      const fallback = getFallbackMappings();
+      // Cache the fallback so subsequent calls stay warm
+      cachedMappings = {
+        data: fallback,
+        expiresAt: Date.now() + CACHE_TTL_MS,
+      };
+      return NextResponse.json(fallback);
+    }
+
     return NextResponse.json(mappings);
   } catch (error) {
     console.error('Error fetching mappings:', error);

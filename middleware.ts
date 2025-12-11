@@ -28,16 +28,40 @@ export default auth((req) => {
   const protectedRoutes = ['/workshop', '/operations', '/schedule', '/issues', '/admin'];
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
 
+  const role = req.auth?.user?.role;
+
   if (isProtectedRoute && !isLoggedIn) {
     const loginUrl = new URL('/login', req.url);
     loginUrl.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
+  // Role-based gates to keep drivers out of staff areas
+  if (role === 'DRIVER' && isProtectedRoute) {
+    return NextResponse.redirect(new URL('/report', req.url));
+  }
+
+  if (pathname.startsWith('/operations')) {
+    if (role !== 'OPERATIONS' && role !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/workshop', req.url));
+    }
+  }
+
+  if (pathname.startsWith('/workshop')) {
+    if (role !== 'WORKSHOP' && role !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/operations', req.url));
+    }
+  }
+
+  if (pathname.startsWith('/schedule') || pathname.startsWith('/issues')) {
+    if (role !== 'WORKSHOP' && role !== 'OPERATIONS' && role !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/login', req.url));
+    }
+  }
+
   // Admin-only routes
   if (pathname.startsWith('/admin')) {
-    const userRole = req.auth?.user?.role;
-    if (userRole !== 'ADMIN') {
+    if (role !== 'ADMIN') {
       return NextResponse.redirect(new URL('/workshop', req.url));
     }
   }

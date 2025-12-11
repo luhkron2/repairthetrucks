@@ -1,32 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { uploadFiles } from '@/lib/storage';
+import { uploadFiles, getStorageStatus } from '@/lib/storage';
 import { logger } from '@/lib/logger';
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ALLOWED_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-  'video/mp4',
-  'video/quicktime',
-  'video/x-msvideo',
-];
-
-function validateFile(file: File): { valid: boolean; error?: string } {
-  if (file.size > MAX_FILE_SIZE) {
-    return { valid: false, error: `File ${file.name} is too large. Maximum size is 10MB.` };
-  }
-  
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    return { valid: false, error: `File type ${file.type} is not allowed.` };
-  }
-  
-  return { valid: true };
-}
+import { FILE_UPLOAD } from '@/lib/constants';
+import { validateFile } from '@/lib/form-validation';
 
 export async function POST(request: NextRequest) {
   try {
+    const { blobEnabled, s3Configured } = getStorageStatus();
+    if (!blobEnabled && !s3Configured) {
+      return NextResponse.json(
+        { error: 'File storage is not configured. Add Vercel Blob or S3 credentials and try again.' },
+        { status: 503 }
+      );
+    }
+
     const formData = await request.formData();
     const files = formData.getAll('files') as File[];
 
@@ -34,13 +21,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No files provided' }, { status: 400 });
     }
 
-    if (files.length > 10) {
-      return NextResponse.json({ error: 'Maximum 10 files allowed' }, { status: 400 });
+    if (files.length > FILE_UPLOAD.maxFiles) {
+      return NextResponse.json({ error: `Maximum ${FILE_UPLOAD.maxFiles} files allowed` }, { status: 400 });
     }
 
     // Validate all files first
     for (const file of files) {
-      const validation = validateFile(file);
+      const validation = validateFile(file, {
+        maxSizeMB: FILE_UPLOAD.maxSizeMB,
+        allowedTypes: FILE_UPLOAD.allowedTypes,
+      });
       if (!validation.valid) {
         return NextResponse.json({ error: validation.error }, { status: 400 });
       }

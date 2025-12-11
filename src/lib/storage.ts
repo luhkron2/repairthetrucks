@@ -9,8 +9,17 @@ const endpoint = process.env.S3_ENDPOINT;
 const accessKeyId = process.env.S3_ACCESS_KEY_ID;
 const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
 const publicBaseUrl = process.env.S3_PUBLIC_BASE_URL;
+const hasBlobSupport = Boolean(process.env.VERCEL) || Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+const hasS3Config = Boolean(bucket && region && accessKeyId && secretAccessKey);
 
 let cachedClient: S3Client | null = null;
+
+export function getStorageStatus() {
+  return {
+    blobEnabled: hasBlobSupport,
+    s3Configured: hasS3Config,
+  };
+}
 
 function getClient(): S3Client {
   if (!bucket || !region || !accessKeyId || !secretAccessKey) {
@@ -40,12 +49,9 @@ function buildPublicUrl(key: string): string {
 }
 
 async function tryVercelBlobUpload(file: File): Promise<string | null> {
-  try {
-    // Prefer Vercel Blob when running on Vercel (no extra config) or when an explicit token is present
-    const onVercel = Boolean(process.env.VERCEL);
-    const hasBlobToken = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
-    if (!onVercel && !hasBlobToken) return null;
+  if (!hasBlobSupport) return null;
 
+  try {
     const arrayBuffer = await file.arrayBuffer();
     const body = Buffer.from(arrayBuffer);
     const key = `${randomUUID()}-${file.name}`;
@@ -65,14 +71,21 @@ async function tryVercelBlobUpload(file: File): Promise<string | null> {
 }
 
 export async function uploadFile(file: File): Promise<string> {
-  // 1) Try Vercel Blob (easiest on Vercel Free)
-  const blobUrl = await tryVercelBlobUpload(file);
-  if (blobUrl) return blobUrl;
+  const { blobEnabled, s3Configured } = getStorageStatus();
+  if (!blobEnabled && !s3Configured) {
+    throw new Error('No storage backend is configured (enable Vercel Blob or provide S3 credentials).');
+  }
+
+  // 1) Try Vercel Blob (easiest on Vercel Free) when available
+  if (blobEnabled) {
+    const blobUrl = await tryVercelBlobUpload(file);
+    if (blobUrl) return blobUrl;
+  }
 
   // 2) Fallback to S3-compatible storage (R2/S3)
   try {
-    if (!bucket || !region || !accessKeyId || !secretAccessKey) {
-      throw new Error('No storage backend is configured (Vercel Blob not available and S3 env vars missing).');
+    if (!s3Configured || !bucket || !region || !accessKeyId || !secretAccessKey) {
+      throw new Error('S3 storage is not configured and Vercel Blob upload is unavailable.');
     }
 
     const arrayBuffer = await file.arrayBuffer();

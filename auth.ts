@@ -34,7 +34,8 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
           },
         });
 
-        if (!user || !user.password) {
+        // Prevent driver accounts from signing in with credentials
+        if (!user || !user.password || user.role === 'DRIVER') {
           return null;
         }
 

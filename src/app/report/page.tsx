@@ -14,8 +14,10 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { UploadZone } from '@/components/upload-zone';
+import { FILE_UPLOAD } from '@/lib/constants';
 import { fetchMappings, type MappingsCache } from '@/lib/mappings';
 import { queueIssue, retryQueue, getQueueLength } from '@/lib/offline';
+import { getFallbackMappings } from '@/lib/mapping-fallback';
 import { toast } from 'sonner';
 import { Loader2, MapPin, Wifi, WifiOff, RefreshCw, UploadCloud, Phone, AlertCircle, Wrench, Thermometer, AlertTriangle, ArrowRight, Truck } from 'lucide-react';
 import { Logo } from '@/components/ui/logo';
@@ -58,6 +60,7 @@ export default function ReportPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [isOffline, setIsOffline] = useState(false);
   const [queueLength, setQueueLength] = useState(0);
+  const uploadHint = `Accepted formats: JPG, PNG, WEBP, GIF, MP4/MOV/AVI up to ${FILE_UPLOAD.maxSizeMB}MB each (${FILE_UPLOAD.maxFiles} files max).`;
   
   // Get dropdown data from database mappings
   const fleetNumbers = mappings
@@ -147,14 +150,24 @@ export default function ReportPage() {
 
       try {
         const fresh = await fetchMappings();
+        const resolved =
+          Object.keys(fresh.drivers).length === 0 &&
+          Object.keys(fresh.fleets).length === 0 &&
+          Object.keys(fresh.trailers).length === 0
+            ? getFallbackMappings()
+            : fresh;
+
         if (!cancelled) {
-          setMappings(fresh);
-          window.localStorage.setItem(MAPPINGS_CACHE_KEY, JSON.stringify(fresh));
+          setMappings(resolved);
+          window.localStorage.setItem(MAPPINGS_CACHE_KEY, JSON.stringify(resolved));
         }
       } catch (error) {
         console.error('Error fetching mappings:', error);
         if (!cached && !cancelled) {
-          toast.error('Unable to load fleet data. Check your connection.');
+          const fallback = getFallbackMappings();
+          setMappings(fallback);
+          window.localStorage.setItem(MAPPINGS_CACHE_KEY, JSON.stringify(fallback));
+          toast.info('Using fallback fleet data while we reconnect.');
         } else if (!cancelled) {
           toast.info('Showing saved fleet data. Some options may be outdated.');
         }
@@ -299,10 +312,21 @@ const onSubmit = async (data: ReportForm) => {
         body: formData,
       });
 
-      if (uploadRes.ok) {
-        const { urls } = await uploadRes.json();
-        mediaUrls = urls;
+      if (!uploadRes.ok) {
+        let uploadError = 'Failed to upload files';
+        try {
+          const responseBody = await uploadRes.json();
+          if (responseBody?.error) {
+            uploadError = responseBody.error;
+          }
+        } catch {
+          // ignore parse errors
+        }
+        throw new Error(uploadError);
       }
+
+      const { urls } = await uploadRes.json();
+      mediaUrls = urls;
     }
 
     const response = await fetch('/api/issues', {
@@ -739,7 +763,7 @@ const onSubmit = async (data: ReportForm) => {
                     <UploadZone onFilesChange={setFiles} />
                     <div className="mt-3 flex items-start gap-2 text-xs text-slate-500 dark:text-slate-400">
                       <UploadCloud className="mt-0.5 h-4 w-4 text-blue-500 dark:text-blue-300" />
-                      <span>Accepted formats: JPG, PNG, MP4 up to 50MB each.</span>
+                      <span>{uploadHint}</span>
                     </div>
                   </div>
                 </section>

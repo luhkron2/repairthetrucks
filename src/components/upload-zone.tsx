@@ -1,10 +1,13 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useId, useRef } from 'react';
 import Image from 'next/image';
 import { Upload, X, FileVideo } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { FILE_UPLOAD } from '@/lib/constants';
+import { validateFile } from '@/lib/form-validation';
+import { toast } from 'sonner';
 
 interface UploadZoneProps {
   onFilesChange: (files: File[]) => void;
@@ -15,49 +18,59 @@ interface UploadZoneProps {
 
 export function UploadZone({
   onFilesChange,
-  maxFiles = 10,
-  accept = 'image/*,video/*',
+  maxFiles = FILE_UPLOAD.maxFiles,
+  accept = FILE_UPLOAD.allowedTypes.join(','),
   className,
 }: UploadZoneProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [previews, setPreviews] = useState<Record<string, string>>({});
+  const inputId = useId();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleFiles = useCallback(
     (newFiles: FileList | null) => {
       if (!newFiles) return;
 
-      const fileArray = Array.from(newFiles).slice(0, maxFiles - files.length);
-      
-      // Validate files
+      const availableSlots = Math.max(0, maxFiles - files.length);
+      if (availableSlots === 0) {
+        toast.error(`You can only attach ${maxFiles} file${maxFiles > 1 ? 's' : ''}.`);
+        return;
+      }
+
+      const fileArray = Array.from(newFiles).slice(0, availableSlots);
+
       const validFiles: File[] = [];
       const errors: string[] = [];
-      
+
       fileArray.forEach((file) => {
-        if (file.size > 10 * 1024 * 1024) { // 10MB limit
-          errors.push(`${file.name} is too large (max 10MB)`);
+        const validation = validateFile(file, {
+          maxSizeMB: FILE_UPLOAD.maxSizeMB,
+          allowedTypes: FILE_UPLOAD.allowedTypes,
+        });
+
+        if (!validation.valid) {
+          if (validation.error) errors.push(validation.error);
           return;
         }
-        
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/quicktime'];
-        if (!allowedTypes.includes(file.type)) {
-          errors.push(`${file.name} has unsupported file type`);
-          return;
-        }
-        
+
         validFiles.push(file);
       });
-      
+
       if (errors.length > 0) {
         console.warn('File validation errors:', errors);
-        // You could show these errors to the user
+        toast.error(errors[0], { description: errors.slice(1).join(' ') || undefined });
       }
-      
-      if (validFiles.length === 0) return;
+
+      if (validFiles.length === 0) {
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        return;
+      }
       
       const updatedFiles = [...files, ...validFiles];
       setFiles(updatedFiles);
       onFilesChange(updatedFiles);
+      if (fileInputRef.current) fileInputRef.current.value = '';
 
       // Generate previews
       validFiles.forEach((file) => {
@@ -139,15 +152,16 @@ export function UploadZone({
       >
         <input
           type="file"
-          id="file-upload"
+          id={inputId}
           className="hidden"
           accept={accept}
           multiple
+          ref={fileInputRef}
           onChange={(e) => handleFiles(e.target.files)}
           disabled={files.length >= maxFiles}
         />
         <label
-          htmlFor="file-upload"
+          htmlFor={inputId}
           className="cursor-pointer flex flex-col items-center"
         >
           <Upload className="w-12 h-12 mb-4 text-muted-foreground" />

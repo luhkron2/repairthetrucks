@@ -163,7 +163,14 @@ export interface FileValidationResult {
   error?: string;
 }
 
-export function validateFile(file: File, maxSizeMB = 10): FileValidationResult {
+export function validateFile(
+  file: File,
+  options?: { maxSizeMB?: number; allowedTypes?: string[] }
+): FileValidationResult {
+  const maxSizeMB = options?.maxSizeMB ?? 10;
+  const allowedTypes =
+    options?.allowedTypes ?? ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'video/mp4', 'video/quicktime'];
+
   const maxSize = maxSizeMB * 1024 * 1024; // Convert to bytes
   
   // Check size
@@ -176,11 +183,10 @@ export function validateFile(file: File, maxSizeMB = 10): FileValidationResult {
   }
   
   // Check type
-  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'video/mp4', 'video/quicktime'];
-  if (!validTypes.includes(file.type)) {
+  if (!allowedTypes.includes(file.type)) {
     return {
       valid: false,
-      error: 'Invalid file type. Please upload JPG, PNG, WEBP, MP4, or MOV files.',
+      error: 'Invalid file type. Please upload JPG, PNG, WEBP, GIF, MP4, MOV, or AVI files.',
     };
   }
   
