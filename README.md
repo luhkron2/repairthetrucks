@@ -51,7 +51,7 @@ SE Repairs is a comprehensive, modern fleet management solution designed for ent
 - **Authentication**: NextAuth.js
 - **File Storage**: S3-compatible object storage (production), Local (development)
 - **UI Components**: Radix UI, shadcn/ui
-- **Deployment**: Render (Next.js SSR)
+- **Deployment**: Vercel (Recommended), Render
 
 ## Quick Start
 
@@ -65,9 +65,11 @@ SE Repairs is a comprehensive, modern fleet management solution designed for ent
    ```
 
 2. **Environment Setup**
-   ```bash
-   cp env.example .env
-   # Edit .env with your database URL
+   Create `.env` with local development settings:
+   ```env
+   DATABASE_URL="file:./dev.db"
+   NEXTAUTH_SECRET="set-a-strong-random-string"
+   NEXTAUTH_URL="http://localhost:3000"
    ```
 
 3. **Database Setup**
@@ -83,11 +85,22 @@ SE Repairs is a comprehensive, modern fleet management solution designed for ent
 
 5. **Access Application**
    - Open http://localhost:3000
-   - Test accounts available (see DEPLOYMENT.md)
+   - Staff login (NextAuth credentials) at `/login`:
+     - `admin@example.com / password123`
+     - `ops@example.com / password123`
+     - `workshop@example.com / password123`
+   - Demo access gate at `/access` (no email):
+     - Operations: `ops123`
+     - Workshop: `workshop123`
 
 ### Production Deployment
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for a full Render deployment playbook.
+Deploy seamlessly to Vercel with one click:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyour-org%2Fse-repairs&env=NEXTAUTH_SECRET,NEXTAUTH_URL,DATABASE_URL,BLOB_READ_WRITE_TOKEN)
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for the full Vercel guide.
+For Render deployment, see [DEPLOYMENT_RENDER.md](./DEPLOYMENT_RENDER.md).
 
 ## Project Structure
 
@@ -157,7 +170,7 @@ se-repairs/
 ## Environment Variables
 
 ```env
-# Database
+# Database (production use PostgreSQL; development uses SQLite)
 DATABASE_URL="postgresql://..."
 
 # Authentication
@@ -199,8 +212,4 @@ Private - All rights reserved
 
 ## Support
 
-For technical support or questions, contact the development team.# se-repairs
-# SEREPAIRSV2
-# serepairsv2
-# serepairsv2
-# serepairsv2
+For technical support or questions, contact the development team.

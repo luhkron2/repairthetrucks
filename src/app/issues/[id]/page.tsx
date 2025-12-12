@@ -218,6 +218,7 @@ export default function IssueDetailPage() {
                             sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
                           />
                         ) : (
+                          // eslint-disable-next-line jsx-a11y/media-has-caption
                           <video src={media.url} controls className="w-full h-full object-cover" />
                         )}
                       </div>

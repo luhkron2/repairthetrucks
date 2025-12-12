@@ -504,7 +504,7 @@ Real-time view of:
 - View video tutorials
 
 #### Contact Support
-- **Email**: support@se-repairs.com
+- **Email**: workshop@senational.com.au
 - **Phone**: 1-800-SE-REPAIRS
 - **Live Chat**: Available during business hours
 - **Emergency**: 24/7 hotline for critical issues

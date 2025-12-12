@@ -165,7 +165,7 @@ export interface FileValidationResult {
 
 export function validateFile(
   file: File,
-  options?: { maxSizeMB?: number; allowedTypes?: string[] }
+  options?: { maxSizeMB?: number; allowedTypes?: readonly string[] }
 ): FileValidationResult {
   const maxSizeMB = options?.maxSizeMB ?? 10;
   const allowedTypes =
@@ -194,7 +194,7 @@ export function validateFile(
 }
 
 // Check if form has unsaved changes
-export function hasUnsavedChanges(formData: Record<string, any>, savedData: Record<string, any> | null): boolean {
+export function hasUnsavedChanges(formData: Record<string, unknown>, savedData: Record<string, unknown> | null): boolean {
   if (!savedData) return false;
   
   // Compare key fields

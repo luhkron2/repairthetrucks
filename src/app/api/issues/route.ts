@@ -6,7 +6,14 @@ import { logger } from '@/lib/logger';
 
 const hasValidDatabaseUrl = () => {
   const url = process.env.DATABASE_URL;
-  return typeof url === 'string' && (url.startsWith('postgres://') || url.startsWith('postgresql://') || url.startsWith('file://'));
+  return (
+    typeof url === 'string' &&
+    (
+      url.startsWith('postgres://') ||
+      url.startsWith('postgresql://') ||
+      url.startsWith('file:') // allow SQLite URLs like file:./dev.db
+    )
+  );
 };
 
 const issueSchema = z.object({

@@ -7,8 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Logo } from '@/components/ui/logo';
-import { Navigation } from '@/components/navigation';
 import { LogOut, Filter, Wrench } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
@@ -41,7 +39,7 @@ export default function WorkshopPage() {
       const response = await fetch('/api/issues');
       if (response.ok) {
         const data = await response.json();
-        setIssues(data);
+        setIssues(Array.isArray(data) ? data : (data.issues ?? []));
       }
     } catch (error) {
       console.error('Failed to fetch issues:', error);

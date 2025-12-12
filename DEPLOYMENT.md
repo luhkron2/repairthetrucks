@@ -1,130 +1,83 @@
-# SE Repairs – Render Deployment Guide
+# SE Repairs – Vercel Deployment Guide
 
-This playbook walks through deploying the SE Repairs application to [Render](https://render.com) with a managed PostgreSQL instance and S3-compatible object storage.
+This guide walks through deploying the SE Repairs application to [Vercel](https://vercel.com), the creators of Next.js. This is the recommended deployment method for best performance and ease of use.
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyour-org%2Fse-repairs&env=NEXTAUTH_SECRET,NEXTAUTH_URL,POSTGRES_PRISMA_URL,POSTGRES_URL_NON_POOLING,BLOB_READ_WRITE_TOKEN)
 
 ## 1. Prerequisites
-- GitHub (or GitLab/Bitbucket) repository containing this project
-- Render account
-- S3-compatible object storage (AWS S3, Cloudflare R2, Backblaze B2, etc.)
-- Domain registrar access (for DNS cut-over)
+- GitHub repository containing this project
+- Vercel account
+- A Postgres database (Vercel Postgres or external)
+- Blob storage (Vercel Blob or S3)
 
 ---
 
-## 2. Configure Object Storage
-1. Create or identify a bucket that allows public read access to uploaded media.
-2. Generate API credentials (`access key` / `secret`).
-3. Record the following values for later:
-   - `S3_BUCKET` – bucket name
-   - `S3_REGION` – AWS region or provider region slug
-   - `S3_ENDPOINT` – optional custom endpoint (R2/B2). Leave blank for AWS.
-   - `S3_PUBLIC_BASE_URL` – the public URL prefix for objects (e.g. `https://bucket.s3.ap-southeast-2.amazonaws.com`)
-   - `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`
-
-> If your provider requires signed URLs instead of a public bucket, integrate that before go-live. The current implementation expects the bucket (or CDN in front) to serve files publicly.
+## 2. One-Click Deployment (Recommended)
+1. Click the **Deploy with Vercel** button above.
+2. Link your GitHub account and select the repository.
+3. Vercel will prompt you to configure the project.
+   - **Database**: Add the **Vercel Postgres** integration.
+   - **Storage**: Add the **Vercel Blob** integration.
+4. **Environment Variables**: Fill in the required variables (see below).
 
 ---
 
-## 3. Render Blueprint
-Render can provision services via `render.yaml`. This repo includes a blueprint at `render.yaml`. Review it and adjust the following before applying:
+## 3. Manual Configuration
 
-- `services[0].name` – change if you prefer a different service name.
-- `services[0].region` – choose the Render region closest to your users (`oregon`, `frankfurt`, etc.).
-- `databases[0].plan` – upgrade from `starter` if you expect higher load.
+### Database (Vercel Postgres)
+1. In your Vercel project dashboard, go to the **Storage** tab.
+2. Click **Connect Store** and select **Postgres**.
+3. Once created, Vercel automatically adds `POSTGRES_PRISMA_URL` and `POSTGRES_URL_NON_POOLING` to your environment variables.
+4. **Important**: Update your `schema.prisma` to use these variables if not already set (it defaults to `DATABASE_URL`).
+   - If using Vercel Postgres, set `DATABASE_URL` in your Vercel environment variables to the value of `POSTGRES_PRISMA_URL`.
 
-Apply the blueprint:
-```bash
-render blueprint deploy render.yaml
-```
-Alternatively, create resources in the Render dashboard manually using the same settings.
+### File Storage (Vercel Blob)
+1. In the **Storage** tab, click **Connect Store** and select **Blob**.
+2. This automatically adds `BLOB_READ_WRITE_TOKEN` to your environment variables.
+3. The application is already configured to prioritize Vercel Blob if this token is present.
 
----
-
-## 4. Environment Variables
-Configure these for the Web Service on Render:
+### Environment Variables
+Configure these in **Settings > Environment Variables**:
 
 | Key | Description |
 | --- | --- |
-| `DATABASE_URL` | Added automatically when using the Render Postgres add-on |
 | `NEXTAUTH_SECRET` | Generate with `openssl rand -base64 32` |
-| `NEXTAUTH_URL` | `https://<your-service>.onrender.com` after the first deploy, then update when adding a custom domain |
-| `S3_BUCKET` | Bucket name |
-| `S3_REGION` | Region slug |
-| `S3_ENDPOINT` | Optional custom endpoint (leave blank for AWS) |
-| `S3_PUBLIC_BASE_URL` | Public CDN/base URL |
-| `S3_ACCESS_KEY_ID` | Object storage access key |
-| `S3_SECRET_ACCESS_KEY` | Object storage secret |
-| `NODE_ENV` | `production` |
+| `NEXTAUTH_URL` | Your deployment URL (e.g., `https://se-repairs.vercel.app`) |
+| `DATABASE_URL` | Connection string for your database (use `POSTGRES_PRISMA_URL` if using Vercel Postgres) |
+| `BLOB_READ_WRITE_TOKEN` | Automatically set by Vercel Blob integration |
 
-> Tip: Use Render’s “Secret Files” feature if you prefer to load a full `.env.production` file.
-
----
-
-## 5. Deployment Workflow
-1. Push changes to the branch referenced in `render.yaml` (default `main`).
-2. Render builds using `npm install` then runs `npm run start` (Next.js `next start`). Adjust the commands in `render.yaml` if you use a package manager other than npm.
-3. First deploy will provision the Postgres instance. Once live, capture the public URL for later steps.
+**Legacy S3 Support**:
+If you prefer S3 over Vercel Blob, set the following instead of `BLOB_READ_WRITE_TOKEN`:
+- `S3_BUCKET`
+- `S3_REGION`
+- `S3_ACCESS_KEY_ID`
+- `S3_SECRET_ACCESS_KEY`
 
 ---
 
-## 6. Database Migration & Seed
-Run migrations using Render’s shell:
-```bash
-render shell <service-name>
-npm run db:push
-npm run db:seed   # optional, seeds mapping data
-```
+## 4. Post-Deployment Steps
 
-If you prefer GitHub Actions or your local machine:
-```bash
-DATABASE_URL="..." npm run db:push
-DATABASE_URL="..." npm run db:seed
-```
+### Database Migration
+After deployment, you need to push your database schema:
 
----
+1. Go to your Vercel dashboard.
+2. Navigate to the **Deployments** tab.
+3. Click the three dots on the latest deployment and select **Redeploy** (ensure "Build Cache" is unchecked if you changed env vars).
+4. Alternatively, run migrations locally against the production database:
+   ```bash
+   # Get the connection string from Vercel dashboard
+   export DATABASE_URL="postgres://..."
+   npm run db:push
+   npm run db:seed
+   ```
 
-## 7. Smoke Tests After Deploy
-1. **Mappings/API health**  
-   - Visit the `/report` page; ensure fleet/driver drop-downs populate.  
-   - Run `curl https://<service>.onrender.com/api/mappings` from your terminal and confirm JSON returns without errors.
-2. **Issue submission flow**  
-   - Submit a test issue with 1–2 small attachments; wait for the thank-you page with ticket number.  
-   - In the Render Postgres dashboard (or via `render shell` + `psql`), query `SELECT ticket, driverName FROM "Issue" ORDER BY "createdAt" DESC LIMIT 1;`
-3. **Authentication & RBAC**  
-   - Log in at `/login` with the seeded `admin@example.com` account (`password123`).  
-   - Hit `/operations` and `/workshop` to verify they redirect unauthenticated users but load once you’re signed in.
-4. **File storage**  
-   - Inspect the S3 bucket for newly uploaded objects; confirm they are publicly accessible at the URL returned from `/api/upload`.  
-   - Optional: run `curl -X POST https://<service>.onrender.com/api/upload` with a `multipart/form-data` payload to script the test.
-5. **Logs & metrics**  
-   - Check the Render service logs for Prisma connection messages or upload warnings.  
-   - Confirm no unhandled errors are emitted during the above tests.
+### Custom Domain
+1. Go to **Settings > Domains**.
+2. Add your custom domain (e.g., `www.yourcompany.com`).
+3. Update `NEXTAUTH_URL` in Environment Variables to match the new domain.
 
 ---
 
-## 8. Custom Domain & HTTPS
-1. In Render dashboard, open the Web Service → **Settings** → **Custom Domains**.
-2. Add your domain (e.g. `repairs.example.com`).
-3. Render presents A and CNAME records. Update them at your registrar.
-4. Wait for DNS propagation (usually <30 minutes). Render provisions TLS automatically.
-5. Verify the cut-over with `nslookup repairs.example.com` (points to Render) and `curl -I https://repairs.example.com` (returns `200`).
-6. Update `NEXTAUTH_URL` to `https://repairs.example.com` and trigger a redeploy.
-
----
-
-## 9. Ongoing Operations
-- **Deployments:** Every push to the tracked branch triggers a deploy. Toggle “Auto-Deploy” off if you want manual promotion.
-- **Database backups:** Render Postgres Starter keeps 7-day backups; schedule exports for longer retention.
-- **Environment changes:** Update env vars in Render, then click “Restart Service” to apply.
-- **Scaling:** Upgrade plan or enable background workers if you add scheduled jobs or heavy processing.
-
----
-
-## 10. Troubleshooting
-| Symptom | Check |
-| --- | --- |
-| Uploads fail | Confirm S3 credentials, bucket ACL, and `S3_PUBLIC_BASE_URL` |
-| Authentication redirects to Render URL | Ensure `NEXTAUTH_URL` matches your active hostname |
-| Prisma errors | Verify `DATABASE_URL` and that migrations have run |
-| Cold starts | Upgrade plan or add health checks/pings if you need faster warm-up |
-
-For further assistance, inspect service logs in Render and validate configs with `render services show <service-name>`.
+## 5. Troubleshooting
+- **Database Connection Errors**: Ensure `DATABASE_URL` is set correctly. If using Vercel Postgres, it handles connection pooling automatically.
+- **Upload Errors**: Check if `BLOB_READ_WRITE_TOKEN` is present. If using S3, check your credentials.

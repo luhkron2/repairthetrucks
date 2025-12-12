@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Wrench, Settings, Truck, CheckCircle2, ArrowRight, Shield, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
+import { secureCompare } from '@/lib/utils';
 
 const ACCESS_LEVELS = {
   driver: {
@@ -81,7 +81,7 @@ export default function HomePage() {
     // Immediate password check
     const accessConfig = ACCESS_LEVELS[selectedAccess as keyof typeof ACCESS_LEVELS];
     
-    if (password === accessConfig.password) {
+    if (accessConfig.password && secureCompare(password, accessConfig.password)) {
       // Store access level in session storage
       if (typeof window !== 'undefined') {
         sessionStorage.setItem('accessLevel', selectedAccess);
@@ -142,7 +142,6 @@ export default function HomePage() {
                     placeholder="Enter your password"
                     className="pr-10 h-12 text-base bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-400"
                     required
-                    autoFocus
                   />
                   <button
                     type="button"
@@ -170,10 +169,10 @@ export default function HomePage() {
               <p>
                 Need access? Email{' '}
                 <a
-                  href="mailto:support@se-repairs.com"
+                  href="mailto:workshop%40senational.com.au"
                   className="font-semibold text-blue-300 underline underline-offset-4 hover:text-blue-200"
                 >
-                  support@se-repairs.com
+                  workshop@senational.com.au
                 </a>
               </p>
             </div>
@@ -212,7 +211,7 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          {Object.entries(ACCESS_LEVELS).map(([key, config], index) => {
+          {Object.entries(ACCESS_LEVELS).map(([key, config]) => {
             const IconComponent = config.icon;
             return (
               <Card
@@ -272,10 +271,10 @@ export default function HomePage() {
             <p className="text-sm text-blue-100">
               Need access or forgot your password? Email{' '}
               <a
-                href="mailto:support@se-repairs.com"
+                href="mailto:workshop%40senational.com.au"
                 className="font-semibold text-blue-300 underline underline-offset-4 hover:text-blue-200 transition-colors"
               >
-                support@se-repairs.com
+                workshop@senational.com.au
               </a>{' '}
               for help.
             </p>

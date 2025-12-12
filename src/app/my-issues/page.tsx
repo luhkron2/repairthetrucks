@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Clock, Wrench, CheckCircle2, FileText, Calendar, AlertCircle, ArrowLeft, RefreshCw, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,7 +33,6 @@ interface Issue {
 }
 
 export default function MyIssuesPage() {
-  const router = useRouter();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -247,7 +245,7 @@ export default function MyIssuesPage() {
                 No issues found
               </h3>
               <p className="text-slate-600 dark:text-slate-300 mb-6">
-                You haven't submitted any reports yet, or we couldn't find issues matching your profile.
+                You haven&apos;t submitted any reports yet, or we couldn&apos;t find issues matching your profile.
               </p>
               <Link href="/report">
                 <Button>Report an Issue</Button>

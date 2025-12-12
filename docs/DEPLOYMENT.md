@@ -624,7 +624,7 @@ psql se_repairs_production < backup_YYYYMMDD_HHMMSS.sql
 
 ### Support Contacts
 
-- **Technical Support**: support@se-repairs.com
+- **Technical Support**: workshop@senational.com.au
 - **Emergency Hotline**: +1-800-SE-REPAIRS
 - **Documentation**: https://docs.se-repairs.com
 - **Status Page**: https://status.se-repairs.com

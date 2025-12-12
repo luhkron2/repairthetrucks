@@ -20,12 +20,10 @@ import { queueIssue, retryQueue, getQueueLength } from '@/lib/offline';
 import { getFallbackMappings } from '@/lib/mapping-fallback';
 import { toast } from 'sonner';
 import { Loader2, MapPin, Wifi, WifiOff, RefreshCw, UploadCloud, Phone, AlertCircle, Wrench, Thermometer, AlertTriangle, ArrowRight, Truck } from 'lucide-react';
-import { Logo } from '@/components/ui/logo';
 import { Navigation } from '@/components/navigation';
 import { Footer } from '@/components/footer';
 import { useTranslation } from '@/components/translation-provider';
 import { QuickActionsMenu } from '@/components/quick-actions-menu';
-import { ThemeToggle } from '@/components/theme-toggle';
 
 const reportSchema = z.object({
   driverName: z.string().min(1, 'Driver name is required'),
@@ -879,6 +877,15 @@ const onSubmit = async (data: ReportForm) => {
                   1300 555 732
                 </div>
               </div>
+              <p className="mt-4">
+                Workshop email:{' '}
+                <a
+                  href="mailto:workshop%40senational.com.au"
+                  className="font-semibold underline underline-offset-4"
+                >
+                  workshop@senational.com.au
+                </a>
+              </p>
               <p className="mt-4 text-xs text-blue-900/80 dark:text-blue-100/80">
                 After working hours, contact the duty manager. Critical issues should be escalated immediately.
               </p>

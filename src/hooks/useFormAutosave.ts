@@ -7,7 +7,7 @@ interface UseFormAutosaveOptions<T> {
   enabled?: boolean;
 }
 
-export function useFormAutosave<T extends Record<string, any>>({
+export function useFormAutosave<T extends Record<string, unknown>>({
   key,
   data,
   interval = 30000, // 30 seconds default
@@ -73,7 +73,7 @@ export function useFormAutosave<T extends Record<string, any>>({
 
       const draft = JSON.parse(saved);
       return draft.timestamp;
-    } catch (error) {
+    } catch {
       return null;
     }
   }, [key]);

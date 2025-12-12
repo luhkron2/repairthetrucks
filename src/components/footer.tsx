@@ -29,15 +29,15 @@ export function Footer({ className }: { className?: string }) {
               </Link>
               <p className="text-base text-slate-500 dark:text-slate-400">{footer.description}</p>
               <div className="flex items-center gap-4 pt-2">
-                <a href="#" className="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400">
+                <Link href="/" aria-label="Twitter" className="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400">
                   <Twitter className="h-6 w-6" />
-                </a>
-                <a href="#" className="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400">
+                </Link>
+                <Link href="/" aria-label="Facebook" className="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400">
                   <Facebook className="h-6 w-6" />
-                </a>
-                <a href="#" className="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400">
+                </Link>
+                <Link href="/" aria-label="LinkedIn" className="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400">
                   <Linkedin className="h-6 w-6" />
-                </a>
+                </Link>
               </div>
             </div>
           </div>

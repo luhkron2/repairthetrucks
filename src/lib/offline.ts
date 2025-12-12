@@ -5,8 +5,7 @@ interface OfflineDB extends DBSchema {
     key: string;
     value: {
       id: string;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      data: any;
+      data: Record<string, unknown>;
       timestamp: number;
       retries: number;
     };
@@ -29,8 +28,7 @@ async function getDB() {
   return db;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function queueIssue(data: any): Promise<string> {
+export async function queueIssue(data: Record<string, unknown>): Promise<string> {
   const db = await getDB();
   const id = `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
@@ -103,7 +101,7 @@ export async function getQueueLength(): Promise<number> {
   return count;
 }
 
-export async function getQueuedIssues(): Promise<Array<{ id: string; data: any; timestamp: number; retries: number }>> {
+export async function getQueuedIssues(): Promise<Array<{ id: string; data: Record<string, unknown>; timestamp: number; retries: number }>> {
   const db = await getDB();
   const issues = await db.getAll('issues');
   return issues;

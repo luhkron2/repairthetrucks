@@ -14,7 +14,7 @@ export function isTouchDevice(): boolean {
   return (
     'ontouchstart' in window ||
     navigator.maxTouchPoints > 0 ||
-    (navigator as any).msMaxTouchPoints > 0
+    ((navigator as unknown) as { msMaxTouchPoints?: number }).msMaxTouchPoints! > 0
   );
 }
 
@@ -31,7 +31,7 @@ export function isPWA(): boolean {
   
   return (
     window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as any).standalone === true
+    ((window.navigator as unknown) as { standalone?: boolean }).standalone === true
   );
 }
 
@@ -187,7 +187,7 @@ export async function lockOrientation(orientation: 'portrait' | 'landscape'): Pr
   }
   
   try {
-    await (screen.orientation as any).lock(orientation);
+    await ((screen.orientation as unknown) as { lock: (o: 'portrait' | 'landscape') => Promise<void> }).lock(orientation);
     return true;
   } catch (error) {
     console.warn('Screen orientation lock not supported:', error);
@@ -202,7 +202,7 @@ export function unlockOrientation(): void {
   }
   
   try {
-    (screen.orientation as any).unlock();
+    ((screen.orientation as unknown) as { unlock: () => void }).unlock();
   } catch (error) {
     console.warn('Screen orientation unlock not supported:', error);
   }
@@ -247,7 +247,7 @@ export function getNetworkInfo(): {
     return null;
   }
   
-  const connection = (navigator as any).connection;
+  const connection = (navigator as unknown as { connection?: Partial<{ type: string; effectiveType: string; downlink: number; rtt: number }> }).connection || {};
   
   return {
     type: connection.type || 'unknown',

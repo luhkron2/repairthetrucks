@@ -17,9 +17,9 @@ async function main() {
   console.log('✅ Cleared existing data');
 
   // Hash passwords per role
-  const adminPassword = await bcrypt.hash('admin@senational', 10);
-  const opsPassword = await bcrypt.hash('runtheshow', 10);
-  const workshopPassword = await bcrypt.hash('workshop@senational', 10);
+  const adminPassword = await bcrypt.hash('password123', 10);
+  const opsPassword = await bcrypt.hash('password123', 10);
+  const workshopPassword = await bcrypt.hash('password123', 10);
   const driverPassword = await bcrypt.hash('password123', 10);
 
   // Create users
@@ -252,9 +252,9 @@ async function main() {
 
   console.log('🎉 Seeding complete!');
   console.log('\n📋 Test Accounts:');
-  console.log('  workshop@example.com / workshop@senational');
-  console.log('  ops@example.com / runtheshow');
-  console.log('  admin@example.com / admin@senational');
+  console.log('  workshop@example.com / password123');
+  console.log('  ops@example.com / password123');
+  console.log('  admin@example.com / password123');
   console.log('  driver@example.com / (login disabled for drivers)');
 }
 

@@ -72,9 +72,14 @@ const FloatingActionButton = React.forwardRef<HTMLButtonElement, FloatingActionB
       <>
         {/* Backdrop for expanded state */}
         {isExpanded && (
-          <div
-            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
+          <button
+            type="button"
+            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm w-full h-full border-0 cursor-default"
             onClick={() => setIsExpanded(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setIsExpanded(false);
+            }}
+            aria-label="Close menu"
           />
         )}
 

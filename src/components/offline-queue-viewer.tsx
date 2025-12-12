@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { WifiOff, Clock, RefreshCw, Trash2, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
+import { WifiOff, Clock, RefreshCw, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +11,11 @@ import { toast } from 'sonner';
 
 interface QueuedIssue {
   id: string;
-  data: any;
+  data: {
+    fleetNumber: string;
+    category: string;
+    description: string;
+  };
   timestamp: number;
   retries: number;
 }
@@ -25,7 +29,17 @@ export function OfflineQueueViewer() {
   const loadQueue = async () => {
     try {
       const issues = await getQueuedIssues();
-      setQueuedIssues(issues);
+      const normalized = issues.map((item) => ({
+        id: item.id,
+        data: {
+          fleetNumber: String(item.data.fleetNumber ?? ''),
+          category: String(item.data.category ?? ''),
+          description: String(item.data.description ?? ''),
+        },
+        timestamp: item.timestamp,
+        retries: item.retries,
+      }));
+      setQueuedIssues(normalized);
       const syncTime = await getLastSyncTime();
       setLastSync(syncTime);
     } catch (error) {
@@ -63,7 +77,7 @@ export function OfflineQueueViewer() {
       }
       
       await loadQueue();
-    } catch (error) {
+    } catch {
       toast.error('Failed to sync offline reports');
     } finally {
       setSyncing(false);
@@ -75,7 +89,7 @@ export function OfflineQueueViewer() {
       await removeQueuedIssue(id);
       toast.info('Queued report removed');
       await loadQueue();
-    } catch (error) {
+    } catch {
       toast.error('Failed to remove report');
     }
   };
@@ -117,7 +131,7 @@ export function OfflineQueueViewer() {
         {!isOnline && (
           <div className="flex items-center gap-2 rounded-lg bg-amber-100 px-3 py-2 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
             <AlertCircle className="h-4 w-4" />
-            <span>You're offline. Reports will sync when connection is restored.</span>
+            <span>You&apos;re offline. Reports will sync when connection is restored.</span>
           </div>
         )}
 
@@ -161,7 +175,7 @@ export function OfflineQueueViewer() {
         <div className="flex items-start gap-2 rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-800 dark:bg-blue-900/20 dark:text-blue-200">
           <CheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
           <span>
-            These reports are safely stored on your device and will automatically sync when you're back online.
+            These reports are safely stored on your device and will automatically sync when you&apos;re back online.
           </span>
         </div>
       </CardContent>

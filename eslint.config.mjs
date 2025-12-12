@@ -1,6 +1,7 @@
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
+import securityPlugin from "eslint-plugin-security";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -10,7 +11,12 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...compat.extends(
+    "next/core-web-vitals", 
+    "next/typescript",
+    "plugin:jsx-a11y/recommended"
+  ),
+  securityPlugin.configs.recommended,
   {
     ignores: [
       "node_modules/**",
@@ -20,6 +26,11 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
+  {
+    rules: {
+      "security/detect-object-injection": "off"
+    }
+  }
 ];
 
 export default eslintConfig;

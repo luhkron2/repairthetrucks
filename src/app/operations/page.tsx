@@ -21,7 +21,6 @@ import { toast } from 'sonner';
 import { Issue } from '@prisma/client';
 import { TruckBooking } from '@/components/truck-booking';
 import { Footer } from '@/components/footer';
-import { Logo } from '@/components/ui/logo';
 
 export default function OperationsPage() {
   const { isAuthenticated, accessLevel, loading, logout } = useAuth();
@@ -43,7 +42,8 @@ export default function OperationsPage() {
 
   useEffect(() => {
     const search = searchQuery.trim().toLowerCase();
-    const filtered = issues.filter((issue) => {
+    const safeIssues = Array.isArray(issues) ? issues : [];
+    const filtered = safeIssues.filter((issue) => {
       const matchesSearch =
         search.length === 0 ||
         issue.fleetNumber.toLowerCase().includes(search) ||
@@ -68,7 +68,7 @@ export default function OperationsPage() {
       const response = await fetch('/api/issues');
       if (response.ok) {
         const data = await response.json();
-        setIssues(data);
+        setIssues(Array.isArray(data) ? data : (data.issues ?? []));
       } else {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
