@@ -32,7 +32,7 @@ export default auth((req) => {
   }
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/', '/report', '/access', '/api/issues', '/api/upload', '/api/mappings'];
+  const publicRoutes = ['/', '/report', '/api/issues', '/api/upload', '/api/mappings'];
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
   // Allow public routes
@@ -57,7 +57,7 @@ export default auth((req) => {
   const role = req.auth?.user?.role;
 
   if (isProtectedRoute && !isLoggedIn) {
-    const loginUrl = new URL('/access', req.url);
+    const loginUrl = new URL('/', req.url);
     return NextResponse.redirect(loginUrl);
   }
 
@@ -68,26 +68,26 @@ export default auth((req) => {
 
   if (pathname.startsWith('/operations')) {
     if (role !== 'OPERATIONS' && role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/access', req.url));
+      return NextResponse.redirect(new URL('/', req.url));
     }
   }
 
   if (pathname.startsWith('/workshop')) {
     if (role !== 'WORKSHOP' && role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/access', req.url));
+      return NextResponse.redirect(new URL('/', req.url));
     }
   }
 
   if (pathname.startsWith('/schedule') || pathname.startsWith('/issues')) {
     if (role !== 'WORKSHOP' && role !== 'OPERATIONS' && role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/access', req.url));
+      return NextResponse.redirect(new URL('/', req.url));
     }
   }
 
   // Admin-only routes
   if (pathname.startsWith('/admin')) {
     if (role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/access', req.url));
+      return NextResponse.redirect(new URL('/', req.url));
     }
   }
 

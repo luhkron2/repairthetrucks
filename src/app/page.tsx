@@ -27,7 +27,7 @@ const ACCESS_LEVELS = {
     name: 'Operations',
     description: 'Manage operations and view all reports',
     icon: Settings,
-    password: 'ops123',
+    password: '1234',
     redirect: '/operations',
     color: 'from-purple-500 to-purple-600',
     highlights: [
@@ -40,7 +40,7 @@ const ACCESS_LEVELS = {
     name: 'Workshop',
     description: 'Manage repairs and workshop operations',
     icon: Wrench,
-    password: 'workshop123',
+    password: '5678',
     redirect: '/workshop',
     color: 'from-orange-500 to-orange-600',
     highlights: [
@@ -203,7 +203,7 @@ export default function HomePage() {
             </p>
             <div className="bg-blue-800/30 rounded-lg p-3 border border-blue-700/50">
               <p className="text-sm text-blue-200">
-                Staff use 4-digit PINs: <span className="font-mono bg-blue-900/50 px-2 py-1 rounded">1234</span> (Ops) <span className="font-mono bg-blue-900/50 px-2 py-1 rounded">5678</span> (Workshop)
+                Staff PINs: <span className="font-mono bg-blue-900/50 px-2 py-1 rounded">1234</span> (Ops) <span className="font-mono bg-blue-900/50 px-2 py-1 rounded">5678</span> (Workshop)
               </p>
             </div>
           </div>
