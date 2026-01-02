@@ -26,7 +26,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
-    const errorId = `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const errorId = `error_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     return { hasError: true, error, errorId };
   }
 
@@ -40,7 +40,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       componentStack: errorInfo.componentStack,
       errorBoundary: 'ErrorBoundary',
       timestamp: new Date().toISOString(),
-      userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'SSR'
+      userAgent: typeof window !== 'undefined' && window.navigator ? window.navigator.userAgent : 'SSR'
     });
     
     // Call custom error handler if provided
@@ -61,8 +61,8 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
         componentStack: errorInfo.componentStack,
         errorId: this.state.errorId,
         timestamp: new Date().toISOString(),
-        userAgent: navigator.userAgent,
-        url: window.location.href,
+        userAgent: typeof window !== 'undefined' && window.navigator ? window.navigator.userAgent : 'SSR',
+        url: typeof window !== 'undefined' && window.location ? window.location.href : 'SSR',
       });
     } catch (logError) {
       console.error('Failed to log error:', logError);

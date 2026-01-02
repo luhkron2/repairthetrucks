@@ -20,7 +20,10 @@ export function useFetch<T>(url: string) {
       setData(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : `Failed to fetch data from ${url}`);
-      console.error(`Fetch error from ${url}:`, err);
+      // Only log errors in development to avoid exposing sensitive info
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`Fetch error from ${url}:`, err);
+      }
     } finally {
       setIsLoading(false);
     }

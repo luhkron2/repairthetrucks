@@ -32,7 +32,7 @@ export default auth((req) => {
   }
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/', '/report', '/login', '/api/issues', '/api/upload', '/api/mappings'];
+  const publicRoutes = ['/', '/report', '/access', '/api/issues', '/api/upload', '/api/mappings'];
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
   // Allow public routes
@@ -44,7 +44,7 @@ export default auth((req) => {
     if (pathname.startsWith('/thanks/')) {
       return NextResponse.next();
     }
-    if (!isLoggedIn && !pathname.startsWith('/login')) {
+    if (!isLoggedIn && !pathname.startsWith('/access')) {
       // Allow public access
       return NextResponse.next();
     }
@@ -57,8 +57,7 @@ export default auth((req) => {
   const role = req.auth?.user?.role;
 
   if (isProtectedRoute && !isLoggedIn) {
-    const loginUrl = new URL('/login', req.url);
-    loginUrl.searchParams.set('callbackUrl', pathname);
+    const loginUrl = new URL('/access', req.url);
     return NextResponse.redirect(loginUrl);
   }
 
@@ -69,39 +68,40 @@ export default auth((req) => {
 
   if (pathname.startsWith('/operations')) {
     if (role !== 'OPERATIONS' && role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/workshop', req.url));
+      return NextResponse.redirect(new URL('/access', req.url));
     }
   }
 
   if (pathname.startsWith('/workshop')) {
     if (role !== 'WORKSHOP' && role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/operations', req.url));
+      return NextResponse.redirect(new URL('/access', req.url));
     }
   }
 
   if (pathname.startsWith('/schedule') || pathname.startsWith('/issues')) {
     if (role !== 'WORKSHOP' && role !== 'OPERATIONS' && role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/login', req.url));
+      return NextResponse.redirect(new URL('/access', req.url));
     }
   }
 
   // Admin-only routes
   if (pathname.startsWith('/admin')) {
     if (role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/workshop', req.url));
+      return NextResponse.redirect(new URL('/access', req.url));
     }
   }
 
   const response = NextResponse.next();
+  const isDevelopment = process.env.NODE_ENV === 'development';
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
-    "style-src 'self' 'unsafe-inline'",
+    `script-src 'self' ${isDevelopment ? "'unsafe-eval' 'unsafe-inline'" : ''}`,
+    `style-src 'self' ${isDevelopment ? "'unsafe-inline'" : ''}`,
     "img-src 'self' data: blob: https:",
     "font-src 'self'",
     "connect-src 'self'",
     "media-src 'self' blob:",
-  ].join('; ');
+  ].filter(part => part && !part.endsWith(" ''")).join('; ');
   response.headers.set('Content-Security-Policy', csp);
   if (isProtectedRoute) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow');

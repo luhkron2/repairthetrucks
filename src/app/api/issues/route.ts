@@ -33,6 +33,14 @@ const issueSchema = z.object({
   mediaUrls: z.array(z.string()).optional(),
 });
 
+interface IssueFilters {
+  status?: 'PENDING' | 'IN_PROGRESS' | 'SCHEDULED' | 'COMPLETED';
+  severity?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  fleetNumber?: { contains: string };
+  driverName?: string;
+  createdAt?: { gte?: Date; lte?: Date };
+}
+
 export async function GET(request: NextRequest) {
   if (!hasValidDatabaseUrl()) {
     return NextResponse.json({ error: 'Database connection is not configured.' }, { status: 503 });
@@ -48,14 +56,19 @@ export async function GET(request: NextRequest) {
     const driverName = searchParams.get('driverName');
     const limit = searchParams.get('limit');
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = {};
+    const where: IssueFilters = {};
 
     if (status) {
-      where.status = status;
+      const validStatuses: readonly ('PENDING' | 'IN_PROGRESS' | 'SCHEDULED' | 'COMPLETED')[] = ['PENDING', 'IN_PROGRESS', 'SCHEDULED', 'COMPLETED'];
+      if (validStatuses.includes(status as 'PENDING' | 'IN_PROGRESS' | 'SCHEDULED' | 'COMPLETED')) {
+        where.status = status as 'PENDING' | 'IN_PROGRESS' | 'SCHEDULED' | 'COMPLETED';
+      }
     }
     if (severity) {
-      where.severity = severity;
+      const validSeverities: readonly ('LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL')[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+      if (validSeverities.includes(severity as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL')) {
+        where.severity = severity as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+      }
     }
     if (fleet) {
       where.fleetNumber = { contains: fleet };

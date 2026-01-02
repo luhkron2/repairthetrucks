@@ -196,17 +196,16 @@ export default function HomePage() {
           </div>
           <div className="space-y-3">
             <p className="uppercase tracking-[0.35em] text-xs text-blue-300 font-semibold">
-              Step 1 of 2 • Access Selection
+              Access Selection
             </p>
-            <h1 className="text-5xl font-bold text-white tracking-tight">
-              Welcome to SE Repairs
-            </h1>
-            <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-              Fleet Management & Repair Tracking System
+            <p className="text-2xl text-slate-200">
+              Enter your PIN to access the system
             </p>
-            <p className="text-base text-slate-300 max-w-xl mx-auto">
-              Select your role to access the appropriate dashboard and tools
-            </p>
+            <div className="bg-blue-800/30 rounded-lg p-3 border border-blue-700/50">
+              <p className="text-sm text-blue-200">
+                Staff use 4-digit PINs: <span className="font-mono bg-blue-900/50 px-2 py-1 rounded">1234</span> (Ops) <span className="font-mono bg-blue-900/50 px-2 py-1 rounded">5678</span> (Workshop)
+              </p>
+            </div>
           </div>
         </div>
 

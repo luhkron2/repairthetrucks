@@ -37,12 +37,24 @@ export const commentSchema = z.object({
   body: z.string().min(1, 'Comment cannot be empty').max(1000, 'Comment too long'),
 });
 
-// Input sanitization
+// Enhanced input sanitization
 export function sanitizeInput(input: string): string {
   return input
     .trim()
-    .replace(/[<>]/g, '') // Remove potential HTML tags
-    .substring(0, 1000); // Limit length
+    // Remove potentially dangerous characters and HTML
+    .replace(/<script[^>]*>.*?<\/script>/gis, '')
+    .replace(/<[^>]*>/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '')
+    // Limit length to prevent DoS
+    .substring(0, 1000);
+}
+
+// Enhanced HTML entity encoding
+export function encodeHTMLEntities(input: string): string {
+  const div = document.createElement('div');
+  div.textContent = input;
+  return div.innerHTML;
 }
 
 // File validation

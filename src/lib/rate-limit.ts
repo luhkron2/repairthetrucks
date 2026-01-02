@@ -12,11 +12,15 @@ export function rateLimit(config: RateLimitConfig) {
     const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     const now = Date.now();
 
-    // Clean up expired entries
-    for (const [key, value] of rateLimitStore.entries()) {
-      if (value.resetTime < now) {
-        rateLimitStore.delete(key);
+    // Clean up expired entries (only periodically for performance)
+    if (now % 10000 < 100) { // Roughly every 10 seconds
+      const keysToDelete: string[] = [];
+      for (const [key, value] of rateLimitStore.entries()) {
+        if (value.resetTime < now) {
+          keysToDelete.push(key);
+        }
       }
+      keysToDelete.forEach(key => rateLimitStore.delete(key));
     }
 
     const key = `${ip}:${Math.floor(now / config.windowMs)}`;
