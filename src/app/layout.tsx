@@ -77,37 +77,3 @@ export default async function RootLayout({
     </html>
   );
 }
-
-export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const initialLocale = await getInitialLocale();
-
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <SessionProvider>
-          <ErrorBoundary>
-            <GlobalErrorHandler />
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="dark"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <TranslationProvider initialLocale={initialLocale}>
-                <ServiceWorkerRegister />
-                <PerformanceMonitor enableLogging={process.env.NODE_ENV === 'development'} />
-                {children}
-                <PWAInstaller />
-                <Toaster position="top-center" richColors />
-              </TranslationProvider>
-            </ThemeProvider>
-          </ErrorBoundary>
-        </SessionProvider>
-      </body>
-    </html>
-  );
-}
