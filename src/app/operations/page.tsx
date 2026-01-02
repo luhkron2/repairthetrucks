@@ -32,8 +32,8 @@ export default function OperationsPage() {
 
   useEffect(() => {
     if (!loading) {
-      if (!isAuthenticated || accessLevel !== 'operations') {
-        router.push('/access');
+      if (!isAuthenticated || accessLevel !== 'OPERATIONS') {
+        router.push('/');
         return;
       }
       fetchIssues();

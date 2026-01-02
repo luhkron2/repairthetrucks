@@ -48,8 +48,8 @@ export default function WorkshopPage() {
 
   useEffect(() => {
     if (!loading) {
-      if (!isAuthenticated || accessLevel !== 'workshop') {
-        router.push('/access');
+      if (!isAuthenticated || accessLevel !== 'WORKSHOP') {
+        router.push('/');
         return;
       }
       void fetchIssues();
