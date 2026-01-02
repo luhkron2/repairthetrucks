@@ -2,64 +2,56 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 
 export function useAuth() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [accessLevel, setAccessLevel] = useState<string | null>(null);
+  const { data: session, status } = useSession();
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const checkAuth = () => {
-      // Check if we're in the browser
-      if (typeof window === 'undefined') {
-        setLoading(false);
-        return;
-      }
+    if (status === 'loading') {
+      setLoading(true);
+      return;
+    }
 
-      const auth = sessionStorage.getItem('isAuthenticated');
-      const level = sessionStorage.getItem('accessLevel');
-      
-      if (auth === 'true' && level) {
-        setIsAuthenticated(true);
-        setAccessLevel(level);
-      } else {
-        setIsAuthenticated(false);
-        setAccessLevel(null);
-      }
+    if (!session) {
       setLoading(false);
-    };
+      return;
+    }
 
-    checkAuth();
-  }, []);
+    setLoading(false);
+  }, [session, status]);
 
-  const logout = () => {
-    sessionStorage.removeItem('isAuthenticated');
-    sessionStorage.removeItem('accessLevel');
-    setIsAuthenticated(false);
-    setAccessLevel(null);
-    router.push('/access');
+  const logout = async () => {
+    await signOut({ redirect: false });
+    router.push('/');
   };
 
-  const requireAuth = (requiredLevel?: string) => {
-    if (!isAuthenticated) {
-      router.push('/access');
+  const requireAuth = (requiredRole?: string) => {
+    if (status === 'loading') {
       return false;
     }
-    
-    if (requiredLevel && accessLevel !== requiredLevel) {
-      router.push('/access');
+
+    if (!session) {
+      router.push('/');
       return false;
     }
-    
+
+    if (requiredRole && session.user?.role !== requiredRole && session.user?.role !== 'ADMIN') {
+      router.push('/');
+      return false;
+    }
+
     return true;
   };
 
   return {
-    isAuthenticated,
-    accessLevel,
-    loading,
+    isAuthenticated: !!session,
+    accessLevel: session?.user?.role?.toLowerCase() || null,
+    loading: status === 'loading',
     logout,
-    requireAuth
+    requireAuth,
+    user: session?.user
   };
 }
